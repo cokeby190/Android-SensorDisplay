@@ -1,10 +1,12 @@
 package com.android.fyp.sensors;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,18 +38,30 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private TextView sensor_no;
 	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp;
 	private Button b_acc, b_gyro, b_magnet, b_light, b_prox, b_temp;
+	private Button b_display;
 	
 	//Dialog 
 	DialogAct show_dialog;
 	AlertDialog alert;
+	
+	//Save to External Mem
+	SaveExt save_ext;
+	String data_save = null;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        //Intent i = new Intent(this, AppPref_Act.class);
+        //startActivity(i);
+        
         //initialise UI elements
         initialize();
+        
+        //save data to SD card
+        save_ext = new SaveExt(this);
+        save_ext.setState();
         
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         
@@ -92,6 +106,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
+						data_save += time_stamp_convt() + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(data_save, "accelerometer");
+						
+						data_save = null;
 						break;
 					case Sensor.TYPE_GYROSCOPE:
 						
@@ -101,6 +119,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n");
 						
+						data_save += time_stamp_convt() + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(data_save, "gyroscope");
+						
+						data_save = null;
 						break;
 					case Sensor.TYPE_LIGHT:
 						
@@ -116,7 +138,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						z = event.values[2];
 						
 						tv_magnet.setText("\nMAGNETOMETER: \n\nx-axis: " + x + " (uT) \ny-axis: " + y + " (uT) \nz-axis: " + z + " (uT) \n\n");
+						data_save += time_stamp_convt() + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(data_save, "magnetometer");
 						
+						data_save = null;
 						break;
 					case Sensor.TYPE_PROXIMITY:
 						
@@ -157,12 +182,14 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
 			
+				
+				
 			}
         	
         };
     }
-    
-    /**
+
+	/**
      * Initialise UI elements
      */
     private void initialize() {
@@ -183,6 +210,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	b_prox = (Button) findViewById(R.id.proximity_button);
     	b_temp = (Button) findViewById(R.id.temp_button);
     	
+    	b_display = (Button) findViewById(R.id.b_display);
+    	
+    	b_display.setOnClickListener(this);
     	b_acc.setOnClickListener(this);
     	b_gyro.setOnClickListener(this);
     	b_magnet.setOnClickListener(this);
@@ -231,6 +261,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		//Show the dialog when the user clicks the button
 		switch(v.getId()) {
+			case R.id.b_display:
+				Intent display = new Intent(SensorDisplayActivity.this, DisplaySensor.class);
+				startActivity(display);
+				break;
 			case R.id.accelerometer_button:
 				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer");
 				break;
@@ -276,6 +310,28 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		}
 		
 		alert.show();
-	}
+	}	
 	
+	
+	/**
+	 * Convert time in Millis to dateformat specified by SimpleDateFormat
+	 * @return	String of converted timestamp from Millis
+	 */
+	protected String time_stamp_convt() {
+		// Create a DateFormatter object for displaying date information.
+        SimpleDateFormat formatter = new SimpleDateFormat("ddMMyy hh:mm:ss.SSS");
+
+        // Get date and time information in milliseconds
+        long now = System.currentTimeMillis();
+
+        // Create a calendar object that will convert the date and time value
+        // in milliseconds to date. We use the setTimeInMillis() method of the
+        // Calendar object.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+         
+        System.out.println(formatter.format(calendar.getTime()));
+        
+        return formatter.format(calendar.getTime());
+	}
 }
