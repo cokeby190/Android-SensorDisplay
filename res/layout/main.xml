@@ -23,12 +23,13 @@
         android:layout_height="wrap_content"
         android:text="\n\nNumber of sensors detected: 0" 
         android:layout_marginBottom="20dp"/>
-    
+
     <Button
         android:id="@+id/accelerometer_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Accelerometer Information" />
+        android:background="@drawable/colorbutton"
+        android:text="Accelerometer Information" />"
 
     <TextView
         android:id="@+id/accelerometer_text"
@@ -40,6 +41,7 @@
         android:id="@+id/gyroscope_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/colorbutton"
         android:text="Gyroscope Information" />
 
     <TextView
@@ -52,6 +54,7 @@
         android:id="@+id/magnetometer_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/colorbutton"
         android:text="Magnetometer Information" />
 
     <TextView
@@ -64,6 +67,7 @@
         android:id="@+id/light_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/colorbutton"
         android:text="Light Sensor Information" />
 
     <TextView
@@ -76,6 +80,7 @@
         android:id="@+id/proximity_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/colorbutton"
         android:text="Proximity Sensor Information" />
 
     <TextView
@@ -88,6 +93,7 @@
         android:id="@+id/temp_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/colorbutton"
         android:text="Temperature Sensor Information" />
 
     <TextView

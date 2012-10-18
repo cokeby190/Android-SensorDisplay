@@ -18,6 +18,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * The Activity Displays Sensor Data to the User, including showing a dialog with additional 
+ * hardware information about the sensors when clicked. 
+ * @author Cheryl
+ *
+ */
 public class SensorDisplayActivity extends Activity implements OnClickListener {
 	
 	//Sensor Manager
@@ -31,11 +37,16 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp;
 	private Button b_acc, b_gyro, b_magnet, b_light, b_prox, b_temp;
 	
+	//Dialog 
+	DialogAct show_dialog;
+	AlertDialog alert;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        //initialise UI elements
         initialize();
         
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -43,13 +54,20 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         //list of all sensors
         deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         
-        /**
-         * print out sensor types (int) in LOG
-         */
+        //print out sensor types (int) in LOG
         for (Sensor sensor : deviceSensors) {
             Log.v("Sensors", "" + sensor.getType());
         }
         
+        //Register Sensor Listener for all the sensors in the device. 
+        for (Sensor sensor : deviceSensors) {
+			
+			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+		}
+		
+		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
+
+        //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
 
 			@Override
@@ -57,6 +75,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 			}
 
+			/**
+			 * Function called whenever there are changes in sensor data
+			 */
 			@Override
 			public void onSensorChanged(SensorEvent event) {
 				
@@ -69,7 +90,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						y = event.values[1];
 						z = event.values[2];
 						
-						tv_acc.setText("\n\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n");
+						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
 						break;
 					case Sensor.TYPE_GYROSCOPE:
@@ -78,14 +99,14 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						y = event.values[1];
 						z = event.values[2];
 						
-						tv_gyro.setText("\n\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n");
+						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n");
 						
 						break;
 					case Sensor.TYPE_LIGHT:
 						
 						float light = event.values[0];
 						
-						tv_light.setText("\n\nLIGHT: \n\n" + light + " (lux) \n");
+						tv_light.setText("\nLIGHT: \n\n" + light + " (lux) \n\n");
 						
 						break;
 					case Sensor.TYPE_MAGNETIC_FIELD:
@@ -94,21 +115,21 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						y = event.values[1];
 						z = event.values[2];
 						
-						tv_magnet.setText("\n\nMAGNETOMETER: \n\nx-axis: " + x + " (uT) \ny-axis: " + y + " (uT) \nz-axis: " + z + " (uT) \n");
+						tv_magnet.setText("\nMAGNETOMETER: \n\nx-axis: " + x + " (uT) \ny-axis: " + y + " (uT) \nz-axis: " + z + " (uT) \n\n");
 						
 						break;
 					case Sensor.TYPE_PROXIMITY:
 						
 						float proximity = event.values[0];
 
-						tv_prox.setText("\n\nPROXIMITY: \n\n" + proximity + " (cm) \n\n");
+						tv_prox.setText("\nPROXIMITY: \n\n" + proximity + " (cm) \n\n");
 						
 						break;
-					case Sensor.TYPE_TEMPERATURE:
+					case Sensor.TYPE_AMBIENT_TEMPERATURE:
 						
 						float temp = event.values[0];
 
-						tv_temp.setText("\n\nTEMPERATURE: \n\n" + temp + " (deg Celsius) \n\n");
+						tv_temp.setText("\nTEMPERATURE: \n\n" + temp + " (deg Celsius) \n\n");
 						
 						break;
 				}
@@ -116,22 +137,22 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
 				
 				if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
-					tv_acc.setText("\n\nACCELEROMETER: \n\n" + "Not available on device" + "\n");
+					tv_acc.setText("\nACCELEROMETER: \n\n" + "Not available on device" + "\n\n");
 				}
 				if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) == null) {
-					tv_gyro.setText("\n\nGYROSCOPE: \n\n" + "Not available on device" + "\n");
+					tv_gyro.setText("\nGYROSCOPE: \n\n" + "Not available on device" + "\n\n");
 				}
 				if (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null) {
-					tv_magnet.setText("\n\nMAGNETOMETER: \n\n" + "Not available on device" + "\n");
+					tv_magnet.setText("\nMAGNETOMETER: \n\n" + "Not available on device" + "\n\n");
 				}
 				if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) == null) {
-					tv_light.setText("\n\nLIGHT: \n\n" + "Not available on device" + "\n");
+					tv_light.setText("\nLIGHT: \n\n" + "Not available on device" + "\n\n");
 				}
 				if (mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) == null) {
-					tv_prox.setText("\n\nPROXIMITY: \n\n" + "Not available on device" + "\n");
+					tv_prox.setText("\nPROXIMITY: \n\n" + "Not available on device" + "\n\n");
 				}
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_TEMPERATURE) == null) {
-					tv_temp.setText("\n\nTEMPERATURE: \n\n" + "Not available on device" + "\n");
+				if (mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) == null) {
+					tv_temp.setText("\nTEMPERATURE: \n\n" + "Not available on device" + "\n\n");
 				}
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
@@ -141,6 +162,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         };
     }
     
+    /**
+     * Initialise UI elements
+     */
     private void initialize() {
     	
     	sensor_no = (TextView) findViewById(R.id.sensor_no);
@@ -168,6 +192,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	
     }
     
+    /**
+     * Activity OnResume
+     */
     @Override
 	protected void onResume() { 
 		super.onResume();
@@ -180,6 +207,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
 	}
 
+    /**
+     * Activity OnPause
+     */
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -189,31 +219,35 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * OnClick Listener
+	 */
 	@Override
 	public void onClick(View v) {
 		
-		DialogAct show_dialog = new DialogAct();
-		AlertDialog alert;
+		show_dialog = new DialogAct();
 		
 		switch(v.getId()) {
 			case R.id.accelerometer_button:
 				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-
-					mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-					
-					Spanned accelerometer = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mAcc.getName() + "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Accelerometer" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mAcc.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mAcc.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mAcc.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Accelerometer Information", accelerometer);
-				} else {
-					alert = show_dialog.dialog(this, "Accelerometer Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}
-
-				alert.show();
+//				if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+//
+//					mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//					
+//					Spanned accelerometer = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mAcc.getName() + "</small><br/><br/>"
+//												+ "<big>Type: </big><br/>" + "<small>" + "Accelerometer" + "</small><br/><br/>"
+//												+ "<big>Vendor: </big><br/>" + "<small>" + mAcc.getVendor() + "</small><br/><br/>"
+//												+ "<big>Version: </big><br/>" + "<small>" + mAcc.getVersion() + "</small><br/><br/>"
+//												+ "<big>Power: </big><br/>" + "<small>" + mAcc.getPower() + " mA</small><br/>");
+//					
+//					alert = show_dialog.dialog(this, "Accelerometer Information", accelerometer);
+//				} else {
+//					alert = show_dialog.dialog(this, "Accelerometer Information", Html.fromHtml("Sensor Unsupported by Device"));
+//				}
+//
+//				alert.show();
+				
+				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer", "Accelerometer Information");
 				
 				break;
 			case R.id.gyroscope_button:							
@@ -296,9 +330,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.temp_button:
 				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_TEMPERATURE) != null) {
+				if (mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null) {
 					
-					mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_TEMPERATURE);
+					mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 					
 					Spanned temp = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mTemp.getName()+ "</small><br/><br/>"
 												+ "<big>Type: </big><br/>" + "<small>" + "Temperature" + "</small><br/><br/>"
@@ -316,6 +350,32 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				break;
 		
 		}
+	}
+	
+	/**
+	 * 
+	 * @param sensor
+	 * @param sensor_type
+	 * @param sensor_data
+	 * @param type_str
+	 */
+	private void show_data(Sensor sensor, int sensor_type, String type_str, String dialog_title) {
+		if (mSensorManager.getDefaultSensor(sensor_type) != null) {
+			
+			sensor = mSensorManager.getDefaultSensor(sensor_type);
+			
+			Spanned sensor_data = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + sensor.getName()+ "</small><br/><br/>"
+										+ "<big>Type: </big><br/>" + "<small>" + type_str + "</small><br/><br/>"
+										+ "<big>Vendor: </big><br/>" + "<small>" + sensor.getVendor() + "</small><br/><br/>"
+										+ "<big>Version: </big><br/>" + "<small>" + sensor.getVersion() + "</small><br/><br/>"
+										+ "<big>Power: </big><br/>" + "<small>" + sensor.getPower() + " mA</small><br/>");
+			
+			alert = show_dialog.dialog(this, dialog_title, sensor_data);
+		} else {
+			alert = show_dialog.dialog(this, dialog_title, Html.fromHtml("Sensor Unsupported by Device"));
+		}
+		
+		alert.show();
 	}
 	
 }
