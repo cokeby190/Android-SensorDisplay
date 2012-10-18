@@ -199,6 +199,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	protected void onResume() { 
 		super.onResume();
 		
+		//register listener again onResume
 		for (Sensor sensor : deviceSensors) {
 			
 			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -214,6 +215,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	protected void onPause() {
 		super.onPause();
 		
+		//unregister listener again since User is not using them
 		for (Sensor sensor : deviceSensors) {
 			mSensorManager.unregisterListener(mSensorListener, sensor);
 		}
@@ -227,139 +229,37 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		show_dialog = new DialogAct();
 		
+		//Show the dialog when the user clicks the button
 		switch(v.getId()) {
 			case R.id.accelerometer_button:
-				
-//				if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-//
-//					mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//					
-//					Spanned accelerometer = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mAcc.getName() + "</small><br/><br/>"
-//												+ "<big>Type: </big><br/>" + "<small>" + "Accelerometer" + "</small><br/><br/>"
-//												+ "<big>Vendor: </big><br/>" + "<small>" + mAcc.getVendor() + "</small><br/><br/>"
-//												+ "<big>Version: </big><br/>" + "<small>" + mAcc.getVersion() + "</small><br/><br/>"
-//												+ "<big>Power: </big><br/>" + "<small>" + mAcc.getPower() + " mA</small><br/>");
-//					
-//					alert = show_dialog.dialog(this, "Accelerometer Information", accelerometer);
-//				} else {
-//					alert = show_dialog.dialog(this, "Accelerometer Information", Html.fromHtml("Sensor Unsupported by Device"));
-//				}
-//
-//				alert.show();
-				
-				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer", "Accelerometer Information");
-				
+				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer");
 				break;
 			case R.id.gyroscope_button:							
-				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-					
-					mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-					
-					Spanned gyroscope = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mGyro.getName()+ "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Gyroscope" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mGyro.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mGyro.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mGyro.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Gyroscope Information", gyroscope);
-				} else {
-					alert = show_dialog.dialog(this, "Gyroscope Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}	
-
-				alert.show();
-				
+				show_data(mGyro, Sensor.TYPE_GYROSCOPE, "Gyroscope");
 				break;
 			case R.id.light_button:
-				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
-					
-					mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-					
-					Spanned light = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mLight.getName()+ "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Light" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mLight.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mLight.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mLight.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Light Information", light);
-				} else {
-					alert = show_dialog.dialog(this, "Light Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}
-				
-				alert.show();
-				
+				show_data(mLight, Sensor.TYPE_LIGHT, "Light");
 				break;
 			case R.id.magnetometer_button:
-				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
-					
-					mMagnet = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-					
-					Spanned magnetometer = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mMagnet.getName()+ "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Magnetometer" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mMagnet.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mMagnet.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mMagnet.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Magnetometer Information", magnetometer);
-				} else {
-					alert = show_dialog.dialog(this, "Proximity Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}
-				
-				alert.show();
+				show_data(mMagnet, Sensor.TYPE_MAGNETIC_FIELD, "Magnetometer");
 				break;
 			case R.id.proximity_button:
-				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) != null) {
-					
-					mProx = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-					
-					Spanned proximity = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mProx.getName()+ "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Proximity" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mProx.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mProx.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mProx.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Proximity Information", proximity);
-				} else {
-					alert = show_dialog.dialog(this, "Proximity Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}
-				
-				alert.show();
+				show_data(mProx, Sensor.TYPE_PROXIMITY, "Proximity");
 				break;
 			case R.id.temp_button:
-				
-				if (mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null) {
-					
-					mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
-					
-					Spanned temp = Html.fromHtml("<big>Name: </big><br/>" + "<small>" + mTemp.getName()+ "</small><br/><br/>"
-												+ "<big>Type: </big><br/>" + "<small>" + "Temperature" + "</small><br/><br/>"
-												+ "<big>Vendor: </big><br/>" + "<small>" + mTemp.getVendor() + "</small><br/><br/>"
-												+ "<big>Version: </big><br/>" + "<small>" + mTemp.getVersion() + "</small><br/><br/>"
-												+ "<big>Power: </big><br/>" + "<small>" + mTemp.getPower() + " mA</small><br/>");
-					
-					alert = show_dialog.dialog(this, "Temperature Information", temp);
-				} else {
-					alert = show_dialog.dialog(this, "Temperature Information", Html.fromHtml("Sensor Unsupported by Device"));
-				}
-				
-				alert.show();
-				
+				show_data(mTemp, Sensor.TYPE_AMBIENT_TEMPERATURE, "Temperature");
 				break;
 		
 		}
 	}
 	
 	/**
-	 * 
-	 * @param sensor
-	 * @param sensor_type
-	 * @param sensor_data
-	 * @param type_str
+	 * Function to display sensor information on Android UI in the form of a dialog
+	 * @param sensor		Sensor datatype to initialise particular sensor
+	 * @param sensor_type	type of sensor, TYPE.Sensor_xx
+	 * @param type_str		String to print out TYPE of sensor
 	 */
-	private void show_data(Sensor sensor, int sensor_type, String type_str, String dialog_title) {
+	private void show_data(Sensor sensor, int sensor_type, String type_str) {
 		if (mSensorManager.getDefaultSensor(sensor_type) != null) {
 			
 			sensor = mSensorManager.getDefaultSensor(sensor_type);
@@ -370,9 +270,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 										+ "<big>Version: </big><br/>" + "<small>" + sensor.getVersion() + "</small><br/><br/>"
 										+ "<big>Power: </big><br/>" + "<small>" + sensor.getPower() + " mA</small><br/>");
 			
-			alert = show_dialog.dialog(this, dialog_title, sensor_data);
+			alert = show_dialog.dialog(this, type_str + " Information", sensor_data);
 		} else {
-			alert = show_dialog.dialog(this, dialog_title, Html.fromHtml("Sensor Unsupported by Device"));
+			alert = show_dialog.dialog(this, type_str + " Information", Html.fromHtml("Sensor Unsupported by Device"));
 		}
 		
 		alert.show();
