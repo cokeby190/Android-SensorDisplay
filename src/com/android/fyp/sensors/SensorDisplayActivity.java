@@ -210,9 +210,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	b_prox = (Button) findViewById(R.id.proximity_button);
     	b_temp = (Button) findViewById(R.id.temp_button);
     	
-    	b_display = (Button) findViewById(R.id.b_display);
+    	//b_display = (Button) findViewById(R.id.b_display);
     	
-    	b_display.setOnClickListener(this);
+    	//b_display.setOnClickListener(this);
     	b_acc.setOnClickListener(this);
     	b_gyro.setOnClickListener(this);
     	b_magnet.setOnClickListener(this);
@@ -261,10 +261,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		//Show the dialog when the user clicks the button
 		switch(v.getId()) {
-			case R.id.b_display:
-				Intent display = new Intent(SensorDisplayActivity.this, DisplaySensor.class);
-				startActivity(display);
-				break;
+//			case R.id.b_display:
+//				//Intent display = new Intent(SensorDisplayActivity.this, DisplaySensor.class);
+//				Intent display = new Intent(SensorDisplayActivity.this, OpenDisplay.class);
+//				startActivity(display);
+//				break;
 			case R.id.accelerometer_button:
 				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer");
 				break;

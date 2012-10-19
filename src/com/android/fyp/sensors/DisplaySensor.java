@@ -59,7 +59,8 @@ public class DisplaySensor extends Activity {
         private Path    mPath = new Path();
         private RectF   mRect = new RectF();
         private float   mLastValues[] = new float[3*2];
-        private float   mOrientationValues[] = new float[3];
+        //private float   mOrientationValues[] = new float[3];
+        private float   mAccelerometer[] = new float[3];
         private int     mColors[] = new int[3*2];
         private float   mLastX;
         private float   mScale[] = new float[2];
@@ -71,9 +72,9 @@ public class DisplaySensor extends Activity {
         
         public GraphView(Context context) {
             super(context);
-            mColors[0] = Color.argb(192, 255, 64, 64);
+            mColors[0] = Color.argb(192, 255, 64, 64);		//red
             mColors[1] = Color.argb(192, 64, 128, 64);
-            mColors[2] = Color.argb(192, 64, 64, 255);
+            mColors[2] = Color.argb(192, 64, 64, 255);		//blue
             mColors[3] = Color.argb(192, 64, 255, 255);
             mColors[4] = Color.argb(192, 128, 64, 128);
             mColors[5] = Color.argb(192, 255, 255, 64);
@@ -176,10 +177,12 @@ public class DisplaySensor extends Activity {
                 if (mBitmap != null) {
                     final Canvas canvas = mCanvas;
                     final Paint paint = mPaint;
+                    //if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
                     if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
-                        for (int i=0 ; i<3 ; i++) {
-                            mOrientationValues[i] = event.values[i];
-                        }
+//                        for (int i=0 ; i<3 ; i++) {
+//                            mAccelerometer[i] = event.values[i];
+//                            mOrientationValues[i] = event.values[i];
+//                        }
                     } else {
                         float deltaX = mSpeed;
                         float newX = mLastX + deltaX;
@@ -194,6 +197,19 @@ public class DisplaySensor extends Activity {
                         }
                         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
                             mLastX += mSpeed;
+                        
+//                    	if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//                    		for (int i=0 ; i<3 ; i++) {
+//                              mAccelerometer[i] = event.values[i];
+//                    		}
+//                    		for (int i=0 ; i<3 ; i++) {
+//                    			final float v = mYOffset + event.values[i];
+//                    			paint.setColor(mColors[i]);
+//                    			canvas.drawLine(mLastX, mAccelerometer[i], newX, v, paint);
+//                    			//canvas.drawLine(mLastX, mAccelerometer[i], 0, 0, paint);
+//                    		}
+//                    	}
+                        
                     }
                     invalidate();
                 }
