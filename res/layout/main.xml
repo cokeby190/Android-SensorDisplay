@@ -53,10 +53,7 @@
                 android:layout_height="250dip" />
         </LinearLayout>
     </ScrollView>
-=======
-        android:text="Accelerometer Information" />"
->>>>>>> b3bf97e5a01fc16d080c9bd0355b069aa14cd67d
-
+    
     <TextView
         android:id="@+id/accelerometer_text"
         android:layout_width="wrap_content"
@@ -87,9 +84,6 @@
         </LinearLayout>
     </ScrollView>
     
-    
-=======
->>>>>>> b3bf97e5a01fc16d080c9bd0355b069aa14cd67d
     <TextView
         android:id="@+id/gyroscope_text"
         android:layout_width="wrap_content"
@@ -103,6 +97,23 @@
         android:background="@drawable/colorbutton"
         android:text="Magnetometer Information" />
 
+    <!-- Graph -->        
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/mag_graph"
+                android:layout_width="fill_parent"
+                android:layout_height="250dip" />
+        </LinearLayout>
+    </ScrollView>
+    
     <TextView
         android:id="@+id/magnetometer_text"
         android:layout_width="wrap_content"

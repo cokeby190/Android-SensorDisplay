@@ -71,6 +71,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private GraphView graphView;
 	private GraphViewSeries acc_x, acc_y, acc_z;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z;
+	private GraphViewSeries mag_x, mag_y, mag_z;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -137,10 +138,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						save_ext.writeExt(time_stamp_date() , data_save, "accelerometer");
 						
 						data_save = "";
-					
+
 						acc_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+//						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+//						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_GYROSCOPE:
@@ -157,8 +158,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						data_save = "";
 						
 						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+//						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+//						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_LIGHT:
@@ -179,6 +180,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						save_ext.writeExt(time_stamp_date() , data_save, "magnetometer");
 						
 						data_save = "";
+						
+						mag_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 						
 						break;
 					case Sensor.TYPE_PROXIMITY:
@@ -241,8 +244,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		};
 
  		graphView.addSeries(acc_x); // data
- 		graphView.addSeries(acc_y);
- 		graphView.addSeries(acc_z);
+ 		//graphView.addSeries(acc_y);
+ 		//graphView.addSeries(acc_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
@@ -254,7 +257,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		gyro_x = new GraphViewSeries("gyro_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
  		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
  		gyro_z = new GraphViewSeries("gyro_z", null ,new GraphViewData[] {});
- 			
+ 		
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Gyroscope Data") {
  			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
@@ -266,10 +269,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
  			}
  		};
- 		
+
  		graphView.addSeries(gyro_x); // data
- 		graphView.addSeries(gyro_y);
- 		graphView.addSeries(gyro_z);
+ 		//graphView.addSeries(gyro_y);
+ 		//graphView.addSeries(gyro_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
@@ -277,6 +280,34 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		layout = (LinearLayout) findViewById(R.id.gyro_graph);
  		layout.addView(graphView);
 			
+ 		//Gyroscope graph
+ 		mag_x = new GraphViewSeries("mag_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
+ 		mag_y = new GraphViewSeries("mag_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
+ 		mag_z = new GraphViewSeries("mag_z", null ,new GraphViewData[] {});
+ 		
+ 		// LineGraphView( context, heading)
+ 		graphView = new LineGraphView(this, "Magnetometer Data") {
+ 			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+ 			@Override
+ 			protected String formatLabel(double value, boolean isValueX) {
+ 				if (isValueX)
+ 					return formatter.format(value); 	// convert unix time to human time
+ 				else 
+					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
+ 			}
+ 		};
+
+ 		graphView.addSeries(mag_x); // data
+ 		//graphView.addSeries(gyro_y);
+ 		//graphView.addSeries(gyro_z);
+ 		graphView.setScrollable(true);
+ 		graphView.setViewPort(1, 80000);
+		//graphView.setScalable(true);
+
+ 		layout = (LinearLayout) findViewById(R.id.mag_graph);
+ 		layout.addView(graphView);
+			
+ 		
 	}
 
 	/**
