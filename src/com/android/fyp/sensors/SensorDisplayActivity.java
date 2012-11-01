@@ -8,6 +8,7 @@ import java.util.List;
 import com.jjoe64.graphview.BarGraphView;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.GraphViewSeries.GraphViewStyle;
 import com.jjoe64.graphview.LineGraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
 
@@ -16,6 +17,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -64,19 +66,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	PowerManager.WakeLock wl;
 	
 	//Graph
-	private final Handler mHandler = new Handler();
-	private Runnable mTimer1;
+	//private final Handler mHandler = new Handler();
+	//private Runnable mTimer1;
 	private GraphView graphView;
-	private GraphViewSeries exampleSeries1;
-	private GraphViewSeries exampleSeries2;
-	
-	private double graph2 = 5d;
-
-	private double getRandom() {
-		double high = 3;
-		double low = 0.5;
-		return Math.random() * (high - low) + low;
-	}
+	private GraphViewSeries acc_x, acc_y, acc_z;
+	private GraphViewSeries gyro_x, gyro_y, gyro_z;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -144,7 +138,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						data_save = "";
 					
-						exampleSeries1.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+						acc_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_GYROSCOPE:
@@ -160,7 +156,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						data_save = "";
 						
-						exampleSeries2.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_LIGHT:
@@ -226,19 +224,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         };
         
         //Accelerometer graph
- 		exampleSeries1 = new GraphViewSeries(new GraphViewData[] {
-// 				new GraphViewData(1, 2.0d)
-// 				, new GraphViewData(2, 1.5d)
-// 				, new GraphViewData(2.5, 3.0d) // another frequency
-// 				, new GraphViewData(3, 2.5d)
-// 				, new GraphViewData(4, 1.0d)
-// 				, new GraphViewData(5, 3.0d)
- 		});
+ 		acc_x = new GraphViewSeries("acc_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
+ 		acc_y = new GraphViewSeries("acc_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
+ 		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
  		
- 		graphView = new LineGraphView(
-					this // context
-					, "Accelerometer Data" // heading
-		) {
+ 		// LineGraphView( context, heading)
+ 		graphView = new LineGraphView(this, "Accelerometer Data") {
  			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
  			@Override
  			protected String formatLabel(double value, boolean isValueX) {
@@ -249,7 +240,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  			}
  		};
 
- 		graphView.addSeries(exampleSeries1); // data
+ 		graphView.addSeries(acc_x); // data
+ 		graphView.addSeries(acc_y);
+ 		graphView.addSeries(acc_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
@@ -258,19 +251,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		layout.addView(graphView);
  		
  		//Gyroscope graph
- 		exampleSeries2 = new GraphViewSeries(new GraphViewData[] {
-// 				new GraphViewData(1, 2.0d)
-// 				, new GraphViewData(2, 1.5d)
-// 				, new GraphViewData(2.5, 3.0d) // another frequency
-// 				, new GraphViewData(3, 2.5d)
-// 				, new GraphViewData(4, 1.0d)
-// 				, new GraphViewData(5, 3.0d)
- 		});
+ 		gyro_x = new GraphViewSeries("gyro_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
+ 		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
+ 		gyro_z = new GraphViewSeries("gyro_z", null ,new GraphViewData[] {});
  			
- 		graphView = new LineGraphView(
-					this // context
-					, "Gyroscope Data" // heading
-		) {
+ 		// LineGraphView( context, heading)
+ 		graphView = new LineGraphView(this, "Gyroscope Data") {
  			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
  			@Override
  			protected String formatLabel(double value, boolean isValueX) {
@@ -281,7 +267,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  			}
  		};
  		
- 		graphView.addSeries(exampleSeries2); // data
+ 		graphView.addSeries(gyro_x); // data
+ 		graphView.addSeries(gyro_y);
+ 		graphView.addSeries(gyro_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
