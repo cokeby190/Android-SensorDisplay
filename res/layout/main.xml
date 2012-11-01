@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/colorbutton"
-        android:text="Display" /> 
+        android:text="Display" />
 
     <TextView
         android:id="@+id/sensor_list"
@@ -53,6 +53,9 @@
                 android:layout_height="250dip" />
         </LinearLayout>
     </ScrollView>
+=======
+        android:text="Accelerometer Information" />"
+>>>>>>> b3bf97e5a01fc16d080c9bd0355b069aa14cd67d
 
     <TextView
         android:id="@+id/accelerometer_text"
@@ -85,6 +88,8 @@
     </ScrollView>
     
     
+=======
+>>>>>>> b3bf97e5a01fc16d080c9bd0355b069aa14cd67d
     <TextView
         android:id="@+id/gyroscope_text"
         android:layout_width="wrap_content"

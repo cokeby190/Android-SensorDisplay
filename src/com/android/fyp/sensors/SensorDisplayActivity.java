@@ -11,6 +11,7 @@ import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
 
+import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -180,6 +181,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						save_ext.writeExt(time_stamp_date() , data_save, "magnetometer");
 						
 						data_save = "";
+						
 						break;
 					case Sensor.TYPE_PROXIMITY:
 						
@@ -219,7 +221,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				}
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
-		
 			}
         	
         };
@@ -287,7 +288,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 
  		layout = (LinearLayout) findViewById(R.id.gyro_graph);
  		layout.addView(graphView);
-    }
+			
+	}
 
 	/**
      * Initialise UI elements
