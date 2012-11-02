@@ -22,6 +22,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -65,9 +66,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//Power Manager - to prevent the screen sleeping and stop collecting data
 	PowerManager.WakeLock wl;
 	
+	//Location Manager - to detect location changes
+	LocationManager locationManager;
+	
 	//Graph
-	//private final Handler mHandler = new Handler();
-	//private Runnable mTimer1;
 	private GraphView graphView;
 	private GraphViewSeries acc_x, acc_y, acc_z;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z;
@@ -85,7 +87,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         initialize();
         
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        
+       
+        //set wakelock to dim, i.e. screen will be dim, and CPU will still be running and not stop
         wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
         wl.acquire();
         
@@ -93,6 +96,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         save_ext = new SaveExt(this);
         save_ext.setState();
         
+        //Location Manager
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        
+        //Sensor Manager
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         
         //list of all sensors
@@ -125,6 +132,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 				float x,y,z;
 				
+				/**
+				 * Switchcase to *do something* whenever the sensor of that type changes.
+				 */
 				switch(event.sensor.getType()) {
 					case Sensor.TYPE_ACCELEROMETER:
 						
@@ -134,11 +144,13 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
-						data_save += time_stamp_time() + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp_date() , data_save, "accelerometer");
+						//save to SD
+						data_save += time_stamp("time") + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
 						
 						data_save = "";
 
+						//append data to graph
 						acc_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 //						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
 //						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
@@ -152,11 +164,13 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n");
 						
-						data_save += time_stamp_time() + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp_date() , data_save, "gyroscope");
+						//save to SD
+						data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
 						
 						data_save = "";
 						
+						//append data to graph
 						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 //						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
 //						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
@@ -176,11 +190,14 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						z = event.values[2];
 						
 						tv_magnet.setText("\nMAGNETOMETER: \n\nx-axis: " + x + " (uT) \ny-axis: " + y + " (uT) \nz-axis: " + z + " (uT) \n\n");
-						data_save += time_stamp_time() + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp_date() , data_save, "magnetometer");
+						
+						//save to SD
+						data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+						save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
 						
 						data_save = "";
 						
+						//append data to graph
 						mag_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 						
 						break;
@@ -280,7 +297,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		layout = (LinearLayout) findViewById(R.id.gyro_graph);
  		layout.addView(graphView);
 			
- 		//Gyroscope graph
+ 		//Magnetometer graph
  		mag_x = new GraphViewSeries("mag_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
  		mag_y = new GraphViewSeries("mag_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
  		mag_z = new GraphViewSeries("mag_z", null ,new GraphViewData[] {});
@@ -359,6 +376,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
 		
+		//wakelock
 		wl.acquire(); 
 	}
 
@@ -374,6 +392,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 			mSensorManager.unregisterListener(mSensorListener, sensor);
 		}
 		
+		//release wakelock
 		wl.release();
 	}
 
@@ -444,9 +463,15 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	 * Convert time in Millis to dateformat specified by SimpleDateFormat (date)
 	 * @return	String of converted timestamp from Millis (date)
 	 */
-	protected String time_stamp_date() {
+	protected String time_stamp(String option) {
 		// Create a DateFormatter object for displaying date information.
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy");
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy hh:mm:ss.SSS");
+		
+		if(option == "date")
+			formatter = new SimpleDateFormat("dd-MM-yy");
+		else if(option == "time")
+			formatter = new SimpleDateFormat("hh:mm:ss.SSS");
 
         // Get date and time information in milliseconds
         long now = System.currentTimeMillis();
@@ -462,25 +487,25 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         return formatter.format(calendar.getTime());
 	}
 	
-	/**
-	 * Convert time in Millis to dateformat specified by SimpleDateFormat (time)
-	 * @return	String of converted timestamp from Millis (time)
-	 */
-	protected String time_stamp_time() {
-		// Create a DateFormatter object for displaying date information.
-        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
-
-        // Get date and time information in milliseconds
-        long now = System.currentTimeMillis();
-
-        // Create a calendar object that will convert the date and time value
-        // in milliseconds to date. We use the setTimeInMillis() method of the
-        // Calendar object.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(now);
-         
-        System.out.println(formatter.format(calendar.getTime()));
-        
-        return formatter.format(calendar.getTime());
-	}
+//	/**
+//	 * Convert time in Millis to dateformat specified by SimpleDateFormat (time)
+//	 * @return	String of converted timestamp from Millis (time)
+//	 */
+//	protected String time_stamp_time() {
+//		// Create a DateFormatter object for displaying date information.
+//        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
+//
+//        // Get date and time information in milliseconds
+//        long now = System.currentTimeMillis();
+//
+//        // Create a calendar object that will convert the date and time value
+//        // in milliseconds to date. We use the setTimeInMillis() method of the
+//        // Calendar object.
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(now);
+//         
+//        System.out.println(formatter.format(calendar.getTime()));
+//        
+//        return formatter.format(calendar.getTime());
+//	}
 }
