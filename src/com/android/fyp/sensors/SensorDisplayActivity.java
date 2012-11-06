@@ -273,11 +273,20 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         	
         };
         
+        
+        //------------------------------------- INITIALISE GRAPH -------------------------------------//
+        
+        /**------------------------------------------------------------------------------------------------------**
+ 		 * 	-------------------------------------| ACCELEROMETER GRAPH|------------------------------------------*
+ 		 *//*----------------------------------------------------------------------------------------------------*/		
         //Accelerometer graph
  		acc_x = new GraphViewSeries("acc_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
  		acc_y = new GraphViewSeries("acc_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
  		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
  		
+ 		/**
+ 		 * Graph
+ 		 */
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Accelerometer Data") {
  			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
@@ -300,6 +309,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		LinearLayout layout = (LinearLayout) findViewById(R.id.acc_graph);
  		layout.addView(graphView);
  		
+ 		/**------------------------------------------------------------------------------------------------------**
+ 		 * 	---------------------------------------| GYROSCOPE GRAPH |-------------------------------------------*
+ 		 *//*----------------------------------------------------------------------------------------------------*/																										 	
  		//Gyroscope graph
  		gyro_x = new GraphViewSeries("gyro_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
  		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
@@ -353,8 +365,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 
  		layout = (LinearLayout) findViewById(R.id.mag_graph);
  		layout.addView(graphView);
-			
  		
+ 		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
 
 	/**
@@ -388,7 +400,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	b_light.setOnClickListener(this);
     	b_prox.setOnClickListener(this);
     	b_temp.setOnClickListener(this);
-    	
     }
     
     /**
@@ -426,6 +437,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		wl.release();
 	}
 
+	/**
+	 * Activity OnStop
+	 */
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -495,7 +509,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	}	
 	
 	
-	// Define a listener that responds to location updates
+	/**
+	 * Define a listener that responds to location updates
+	 */
 	LocationListener locationListener = new LocationListener() {
 
 		public void onLocationChanged(Location location) {
@@ -521,10 +537,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		public void onProviderDisabled(String provider) {
 		}
 	};
-	
+
 	/**
 	 * Convert time in Millis to dateformat specified by SimpleDateFormat (date)
-	 * @return	String of converted timestamp from Millis (date)
+	 * @param option	to specify to return the date or the time
+	 * @return			String of converted timestamp from Millis (date)
 	 */
 	protected String time_stamp(String option) {
 		// Create a DateFormatter object for displaying date information.
@@ -549,26 +566,4 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         
         return formatter.format(calendar.getTime());
 	}
-	
-//	/**
-//	 * Convert time in Millis to dateformat specified by SimpleDateFormat (time)
-//	 * @return	String of converted timestamp from Millis (time)
-//	 */
-//	protected String time_stamp_time() {
-//		// Create a DateFormatter object for displaying date information.
-//        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
-//
-//        // Get date and time information in milliseconds
-//        long now = System.currentTimeMillis();
-//
-//        // Create a calendar object that will convert the date and time value
-//        // in milliseconds to date. We use the setTimeInMillis() method of the
-//        // Calendar object.
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(now);
-//         
-//        System.out.println(formatter.format(calendar.getTime()));
-//        
-//        return formatter.format(calendar.getTime());
-//	}
 }
