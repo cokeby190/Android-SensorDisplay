@@ -22,10 +22,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -34,6 +37,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * The Activity Displays Sensor Data to the User, including showing a dialog with additional 
@@ -113,11 +117,37 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         //Register Sensor Listener for all the sensors in the device. 
         for (Sensor sensor : deviceSensors) {
 			
-			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+			//mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        	mSensorManager.registerListener(mSensorListener, sensor, 40000);
 		}
 		
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
+		
+		// location
+		boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
+		// Check if enabled and if not send user to the GSP settings
+		// Better solution would be to display a dialog and suggesting to
+		// go to the settings
+		if (!enabled) {
+
+//			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//			startActivity(intent);
+
+			String location_dis = "This application requires GPS to be turned on. Please enable it in the Settings button.";
+			
+			CreateAlertDialog dialog = new CreateAlertDialog();
+        	AlertDialog alert = dialog.newdialog(this, location_dis);
+        	alert.show();
+        	
+		} else {
+			// Register the listener with the Location Manager to receive
+			// location updates
+			//(String provider, long minTime, float minDistance, LocationListener listener)
+			//locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		}
+		
         //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
 
@@ -396,6 +426,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		wl.release();
 	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		locationManager.removeUpdates(locationListener);
+	}
+
 	/**
 	 * OnClick Listener
 	 */
@@ -459,6 +495,33 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	}	
 	
 	
+	// Define a listener that responds to location updates
+	LocationListener locationListener = new LocationListener() {
+
+		public void onLocationChanged(Location location) {
+
+			// save to SD
+			data_save += time_stamp("time") + "\t" + "GPS" + "\t" + "latitude,"
+					+ location.getLatitude() + "\t" + "longitude,"
+					+ location.getLongitude() + "\t" + "Speed,"
+					+ location.getSpeed() + "\n";
+			save_ext.writeExt(time_stamp("date"), data_save, "GPS");
+
+			data_save = "";
+
+			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onProviderDisabled(String provider) {
+		}
+	};
+	
 	/**
 	 * Convert time in Millis to dateformat specified by SimpleDateFormat (date)
 	 * @return	String of converted timestamp from Millis (date)
@@ -482,7 +545,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(now);
          
-        System.out.println(formatter.format(calendar.getTime()));
+        //System.out.println(formatter.format(calendar.getTime()));
         
         return formatter.format(calendar.getTime());
 	}
