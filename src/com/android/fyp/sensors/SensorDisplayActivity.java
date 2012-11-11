@@ -22,6 +22,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -56,12 +57,17 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//UI Elements
 	private TextView sensor_no;
 	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp;
+	private Button b_start_log, b_end_log;
+	private boolean start_log = false;
+	private boolean end_log = false;
 	private Button b_acc, b_gyro, b_magnet, b_light, b_prox, b_temp;
 	private Button b_display;
 	
 	//Dialog 
 	DialogAct show_dialog;
 	AlertDialog alert;
+	DialogAct_nonSpanned log_dialog;
+	AlertDialog alert_log;
 	
 	//Save to External Mem
 	SaveExt save_ext;
@@ -72,6 +78,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	
 	//Location Manager - to detect location changes
 	LocationManager locationManager;
+	Location last_known;
+	boolean GPSenabled;
+	boolean NETenabled;
 	
 	//Graph
 	private GraphView graphView;
@@ -124,17 +133,18 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
 		
 		// location
-		boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		GPSenabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		NETenabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
 		// Check if enabled and if not send user to the GSP settings
 		// Better solution would be to display a dialog and suggesting to
 		// go to the settings
-		if (!enabled) {
+		if (!GPSenabled && !NETenabled) {
 
 //			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 //			startActivity(intent);
 
-			String location_dis = "This application requires GPS to be turned on. Please enable it in the Settings button.";
+			String location_dis = "This application requires either GPS or Wifi to be turned on. Please enable it in the Settings button.";
 			
 			CreateAlertDialog dialog = new CreateAlertDialog();
         	AlertDialog alert = dialog.newdialog(this, location_dis);
@@ -146,6 +156,25 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 			//(String provider, long minTime, float minDistance, LocationListener listener)
 			//locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			
+			if(!GPSenabled && NETenabled) {
+				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+				Toast.makeText(getApplicationContext(), "GPS no NET yes", Toast.LENGTH_LONG).show();
+			}
+			
+			else if (GPSenabled && !NETenabled) {
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			Toast.makeText(getApplicationContext(), "GPS yes NET no", Toast.LENGTH_LONG).show();
+		}
+			else {
+				Criteria criteria = new Criteria();
+				criteria.setAccuracy(Criteria.ACCURACY_FINE);
+				String bestProvider = locationManager.getBestProvider(criteria, false);
+				last_known = locationManager.getLastKnownLocation(bestProvider);
+				locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
+				
+				Toast.makeText(getApplicationContext(), "GPS yes NET yes", Toast.LENGTH_LONG).show();
+			}		
 		}
 		
         //Sensor Listener Object 
@@ -174,16 +203,20 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
-						//save to SD
-						data_save += time_stamp("time") + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
-						
-						data_save = "";
+						Log.d("LOG", start_log + " " + end_log);
+						if(start_log == true && end_log == true) {
+							Log.d("LOG_ACC", start_log + " " + end_log);
+							//save to SD
+							data_save += time_stamp("time") + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+							save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
+							
+							data_save = "";
+						}
 
 						//append data to graph
 						acc_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-//						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-//						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+						acc_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+						acc_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_GYROSCOPE:
@@ -194,16 +227,18 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n");
 						
-						//save to SD
-						data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
-						
-						data_save = "";
+						if(start_log == true && end_log == true) {
+							//save to SD
+							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+							save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+							
+							data_save = "";
+						}
 						
 						//append data to graph
 						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-//						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-//						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_LIGHT:
@@ -221,14 +256,18 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_magnet.setText("\nMAGNETOMETER: \n\nx-axis: " + x + " (uT) \ny-axis: " + y + " (uT) \nz-axis: " + z + " (uT) \n\n");
 						
-						//save to SD
-						data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-						save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
-						
-						data_save = "";
+						if(start_log == true && end_log == true) {
+							//save to SD
+							data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+							save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
+							
+							data_save = "";
+						}
 						
 						//append data to graph
 						mag_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+						mag_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+						mag_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 						
 						break;
 					case Sensor.TYPE_PROXIMITY:
@@ -281,8 +320,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		 *//*----------------------------------------------------------------------------------------------------*/		
         //Accelerometer graph
  		acc_x = new GraphViewSeries("acc_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
- 		acc_y = new GraphViewSeries("acc_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
- 		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
  		
  		/**
  		 * Graph
@@ -300,14 +337,67 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		};
 
  		graphView.addSeries(acc_x); // data
- 		//graphView.addSeries(acc_y);
- 		//graphView.addSeries(acc_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
 
- 		LinearLayout layout = (LinearLayout) findViewById(R.id.acc_graph);
+ 		LinearLayout layout = (LinearLayout) findViewById(R.id.acc_graph_x);
  		layout.addView(graphView);
+ 		
+ 		acc_y = new GraphViewSeries("acc_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
+ 		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
+ 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Accelerometer Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+ 		
+ 		graphView.addSeries(acc_y); // data
+ 		graphView.setScrollable(true);
+ 		graphView.setViewPort(1, 80000);
+		//graphView.setScalable(true);
+
+ 		layout = (LinearLayout) findViewById(R.id.acc_graph_y);
+ 		layout.addView(graphView);
+ 		
+ 		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
+ 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Accelerometer Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+ 		
+ 		graphView.addSeries(acc_z); // data
+ 		graphView.setScrollable(true);
+ 		graphView.setViewPort(1, 80000);
+		//graphView.setScalable(true);
+
+ 		layout = (LinearLayout) findViewById(R.id.acc_graph_z);
+ 		layout.addView(graphView);
+ 		
+ 		
  		
  		/**------------------------------------------------------------------------------------------------------**
  		 * 	---------------------------------------| GYROSCOPE GRAPH |-------------------------------------------*
@@ -330,15 +420,65 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		};
 
  		graphView.addSeries(gyro_x); // data
- 		//graphView.addSeries(gyro_y);
- 		//graphView.addSeries(gyro_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
 
- 		layout = (LinearLayout) findViewById(R.id.gyro_graph);
+ 		layout = (LinearLayout) findViewById(R.id.gyro_graph_x);
  		layout.addView(graphView);
+ 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_y); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_y);
+		layout.addView(graphView);
+		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_z); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_z);
+		layout.addView(graphView);
 			
+ 		/**------------------------------------------------------------------------------------------------------**
+ 		 * 	-------------------------------------| MAGNETOMETER GRAPH |-------------------------------------------*
+ 		 *//*----------------------------------------------------------------------------------------------------*/	
+ 		
  		//Magnetometer graph
  		mag_x = new GraphViewSeries("mag_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
  		mag_y = new GraphViewSeries("mag_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
@@ -357,14 +497,60 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		};
 
  		graphView.addSeries(mag_x); // data
- 		//graphView.addSeries(gyro_y);
- 		//graphView.addSeries(gyro_z);
  		graphView.setScrollable(true);
  		graphView.setViewPort(1, 80000);
 		//graphView.setScalable(true);
 
- 		layout = (LinearLayout) findViewById(R.id.mag_graph);
+ 		layout = (LinearLayout) findViewById(R.id.mag_graph_x);
  		layout.addView(graphView);
+ 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Magnetometer Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(mag_y); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.mag_graph_y);
+		layout.addView(graphView);
+
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Magnetometer Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(mag_z); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.mag_graph_z);
+		layout.addView(graphView);
  		
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
@@ -373,6 +559,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
      * Initialise UI elements
      */
     private void initialize() {
+    	
+    	b_start_log = (Button) findViewById(R.id.b_start_log);
+    	b_end_log = (Button) findViewById(R.id.b_end_log);
     	
     	sensor_no = (TextView) findViewById(R.id.sensor_no);
     	
@@ -390,9 +579,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	b_prox = (Button) findViewById(R.id.proximity_button);
     	b_temp = (Button) findViewById(R.id.temp_button);
     	
-    	b_display = (Button) findViewById(R.id.b_display);
+    	//b_display = (Button) findViewById(R.id.b_display);
     	
-    	b_display.setOnClickListener(this);
+    	//b_display.setOnClickListener(this);
+    	
+    	b_start_log.setOnClickListener(this);
+    	b_end_log.setOnClickListener(this);
     	
     	b_acc.setOnClickListener(this);
     	b_gyro.setOnClickListener(this);
@@ -419,6 +611,47 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		//wakelock
 		wl.acquire(); 
+		
+		//get location
+		//locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		
+		if (!GPSenabled && !NETenabled) {
+
+//			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//			startActivity(intent);
+
+			String location_dis = "This application requires either GPS or Wifi to be turned on. Please enable it in the Settings button.";
+			
+			CreateAlertDialog dialog = new CreateAlertDialog();
+        	AlertDialog alert = dialog.newdialog(this, location_dis);
+        	alert.show();
+        	
+		} else {
+			// Register the listener with the Location Manager to receive
+			// location updates
+			//(String provider, long minTime, float minDistance, LocationListener listener)
+			//locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			
+			if(!GPSenabled && NETenabled) {
+				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+				Toast.makeText(getApplicationContext(), "GPS no NET yes", Toast.LENGTH_LONG).show();
+			}
+			
+			else if (GPSenabled && !NETenabled) {
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			Toast.makeText(getApplicationContext(), "GPS yes NET no", Toast.LENGTH_LONG).show();
+		}
+			else {
+				Criteria criteria = new Criteria();
+				criteria.setAccuracy(Criteria.ACCURACY_FINE);
+				String bestProvider = locationManager.getBestProvider(criteria, false);
+				last_known = locationManager.getLastKnownLocation(bestProvider);
+				locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
+				
+				Toast.makeText(getApplicationContext(), "GPS yes NET yes", Toast.LENGTH_LONG).show();
+			}		
+		}
 	}
 
     /**
@@ -452,14 +685,41 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		
 		show_dialog = new DialogAct();
+		log_dialog = new DialogAct_nonSpanned();
 		
 		//Show the dialog when the user clicks the button
 		switch(v.getId()) {
-			case R.id.b_display:
-				//Intent display = new Intent(SensorDisplayActivity.this, DisplaySensor.class);
-				Intent display = new Intent(SensorDisplayActivity.this, displayGraph.class);
-				display.putExtra("type", "line");
-				startActivity(display);
+//			case R.id.b_display:
+//				//Intent display = new Intent(SensorDisplayActivity.this, DisplaySensor.class);
+//				Intent display = new Intent(SensorDisplayActivity.this, displayGraph.class);
+//				display.putExtra("type", "line");
+//				startActivity(display);
+//				break;
+			case R.id.b_start_log:
+				Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
+				if(start_log == false && end_log == false) {
+					start_log = true;
+					end_log = true;
+					alert_log = log_dialog.dialog(this, "Alert", "Log has Started.");
+				}
+				else
+					alert_log = log_dialog.dialog(this, "Error!", "Current Log has not ended, cannot start a new Log.");
+					
+				alert_log.show();
+				
+				break;
+			case R.id.b_end_log:
+				Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
+				if(start_log == true && end_log == true) {
+					end_log = false;
+					start_log = false;
+					alert_log = log_dialog.dialog(this, "Alert", "Log has Ended.");
+				}
+				else
+					alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot end Log.");
+				
+				alert_log.show();
+				
 				break;
 			case R.id.accelerometer_button:
 				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer");
@@ -515,15 +775,20 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	LocationListener locationListener = new LocationListener() {
 
 		public void onLocationChanged(Location location) {
-
-			// save to SD
-			data_save += time_stamp("time") + "\t" + "GPS" + "\t" + "latitude,"
-					+ location.getLatitude() + "\t" + "longitude,"
-					+ location.getLongitude() + "\t" + "Speed,"
-					+ location.getSpeed() + "\n";
-			save_ext.writeExt(time_stamp("date"), data_save, "GPS");
-
-			data_save = "";
+			
+			//updating location
+			last_known = location;
+			
+			if(start_log == true && end_log == true) {
+				// save to SD
+				data_save += time_stamp("time") + "\t" + "GPS" + "\t" + "latitude,"
+						+ location.getLatitude() + "\t" + "longitude,"
+						+ location.getLongitude() + "\t" + "Speed,"
+						+ location.getSpeed() + "\n";
+				save_ext.writeExt(time_stamp("date"), data_save, "GPS");
+	
+				data_save = "";
+			}
 
 			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
 		}
@@ -551,7 +816,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		if(option == "date")
 			formatter = new SimpleDateFormat("dd-MM-yy");
 		else if(option == "time")
-			formatter = new SimpleDateFormat("hh:mm:ss.SSS");
+			formatter = new SimpleDateFormat("dd-MM-yy hh:mm:ss.SSS");
 
         // Get date and time information in milliseconds
         long now = System.currentTimeMillis();
