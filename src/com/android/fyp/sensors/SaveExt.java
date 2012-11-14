@@ -68,8 +68,6 @@ public class SaveExt {
 
 		String path = Environment.getExternalStorageDirectory().toString();
 		
-		//Log.d("FILENAME", path);
-		
 	    if (mExtWrite == true) {
 	        try {
 	            File file = new File(path, pathname);

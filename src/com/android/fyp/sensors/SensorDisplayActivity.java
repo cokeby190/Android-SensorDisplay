@@ -326,7 +326,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		 */
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Accelerometer Data") {
- 			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+ 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
  			@Override
  			protected String formatLabel(double value, boolean isValueX) {
  				if (isValueX)
@@ -349,7 +349,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Accelerometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -375,7 +375,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Accelerometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -409,7 +409,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Gyroscope Data") {
- 			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+ 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
  			@Override
  			protected String formatLabel(double value, boolean isValueX) {
  				if (isValueX)
@@ -429,7 +429,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Gyroscope Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -453,7 +453,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Gyroscope Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -486,7 +486,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Magnetometer Data") {
- 			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+ 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
  			@Override
  			protected String formatLabel(double value, boolean isValueX) {
  				if (isValueX)
@@ -506,7 +506,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Magnetometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -530,7 +530,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Magnetometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 			@Override
 			protected String formatLabel(double value, boolean isValueX) {
@@ -811,12 +811,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	protected String time_stamp(String option) {
 		// Create a DateFormatter object for displaying date information.
 		
-		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy hh:mm:ss.SSS");
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
 		
 		if(option == "date")
-			formatter = new SimpleDateFormat("dd-MM-yy");
+			formatter = new SimpleDateFormat("dd-MM-yy HH:00");
 		else if(option == "time")
-			formatter = new SimpleDateFormat("dd-MM-yy hh:mm:ss.SSS");
+			formatter = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
 
         // Get date and time information in milliseconds
         long now = System.currentTimeMillis();
