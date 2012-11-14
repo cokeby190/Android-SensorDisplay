@@ -72,6 +72,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//Save to External Mem
 	SaveExt save_ext;
 	String data_save = "";
+	String curr_time;
 	
 	//Power Manager - to prevent the screen sleeping and stop collecting data
 	PowerManager.WakeLock wl;
@@ -208,7 +209,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 							Log.d("LOG_ACC", start_log + " " + end_log);
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-							save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
+							//save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
+							save_ext.writeExt(curr_time , data_save, "accelerometer");
 							
 							data_save = "";
 						}
@@ -230,7 +232,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						if(start_log == true && end_log == true) {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-							save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+							//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+							save_ext.writeExt(curr_time , data_save, "gyroscope");
 							
 							data_save = "";
 						}
@@ -259,7 +262,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						if(start_log == true && end_log == true) {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-							save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
+							//save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
+							save_ext.writeExt(curr_time , data_save, "magnetometer");
 							
 							data_save = "";
 						}
@@ -554,6 +558,45 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
+    
+    
+    //-------------------------------------------------------------------------------------------//
+    //									 | LOCATION LISTENER |									 //	
+    //-------------------------------------------------------------------------------------------//
+    /**
+	 * Define a listener that responds to location updates
+	 */
+	LocationListener locationListener = new LocationListener() {
+
+		public void onLocationChanged(Location location) {
+			
+			//updating location
+			last_known = location;
+			
+			if(start_log == true && end_log == true) {
+				// save to SD
+				data_save += time_stamp("time") + "\t" + "GPS" + "\t" + "latitude,"
+						+ location.getLatitude() + "\t" + "longitude,"
+						+ location.getLongitude() + "\t" + "Speed,"
+						+ location.getSpeed() + "\n";
+				//save_ext.writeExt(time_stamp("date"), data_save, "GPS");
+				save_ext.writeExt(curr_time, data_save, "GPS");
+	
+				data_save = "";
+			}
+
+			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onProviderDisabled(String provider) {
+		}
+	};
 
 	/**
      * Initialise UI elements
@@ -668,6 +711,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		//release wakelock
 		wl.release();
+		
+		//stop listening for location
+		locationManager.removeUpdates(locationListener);
 	}
 
 	/**
@@ -676,6 +722,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		
+		//stop listening for location
 		locationManager.removeUpdates(locationListener);
 	}
 
@@ -701,6 +749,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					start_log = true;
 					end_log = true;
 					alert_log = log_dialog.dialog(this, "Alert", "Log has Started.");
+					
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+					curr_time = sdf.format(new Date());
 				}
 				else
 					alert_log = log_dialog.dialog(this, "Error!", "Current Log has not ended, cannot start a new Log.");
@@ -767,41 +818,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		
 		alert.show();
 	}	
-	
-	
-	/**
-	 * Define a listener that responds to location updates
-	 */
-	LocationListener locationListener = new LocationListener() {
-
-		public void onLocationChanged(Location location) {
-			
-			//updating location
-			last_known = location;
-			
-			if(start_log == true && end_log == true) {
-				// save to SD
-				data_save += time_stamp("time") + "\t" + "GPS" + "\t" + "latitude,"
-						+ location.getLatitude() + "\t" + "longitude,"
-						+ location.getLongitude() + "\t" + "Speed,"
-						+ location.getSpeed() + "\n";
-				save_ext.writeExt(time_stamp("date"), data_save, "GPS");
-	
-				data_save = "";
-			}
-
-			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
-
-		public void onProviderEnabled(String provider) {
-		}
-
-		public void onProviderDisabled(String provider) {
-		}
-	};
 
 	/**
 	 * Convert time in Millis to dateformat specified by SimpleDateFormat (date)
@@ -814,7 +830,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
 		
 		if(option == "date")
-			formatter = new SimpleDateFormat("dd-MM-yy HH:00");
+			formatter = new SimpleDateFormat("dd-MM-yy");
 		else if(option == "time")
 			formatter = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
 
