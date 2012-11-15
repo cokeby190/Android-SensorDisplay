@@ -769,6 +769,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					end_log = false;
 					start_log = false;
 					alert_log = log_dialog.dialog(this, "Alert", "Log has Ended.");
+					
+					//KILL THE APP once logging stops
+					this.finish();
 				}
 				else
 					alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot end Log.");
