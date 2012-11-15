@@ -73,7 +73,7 @@ public class SaveExt {
 	            File file = new File(path, pathname);
 	            if(!file.exists())
 	            	file.mkdirs();
-	            File writeFile = new File(file, date + " " + filename + ".txt");
+	            File writeFile = new File(file, date + "_" + filename + ".txt");
 	            BufferedOutputStream fw = new BufferedOutputStream(new FileOutputStream(writeFile, true));
 	            //BufferedWriter fw = new BufferedWriter(new FileWriter(writeFile));
 	            fw.write(file_content.getBytes());

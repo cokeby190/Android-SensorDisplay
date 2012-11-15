@@ -210,7 +210,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Accelerometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
 							//save_ext.writeExt(time_stamp("date") , data_save, "accelerometer");
-							save_ext.writeExt(curr_time , data_save, "accelerometer");
+							//save_ext.writeExt(curr_time , data_save, "accelerometer");
+							save_ext.writeExt(curr_time , data_save, "acc");
 							
 							data_save = "";
 						}
@@ -233,7 +234,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
 							//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
-							save_ext.writeExt(curr_time , data_save, "gyroscope");
+							//save_ext.writeExt(curr_time , data_save, "gyroscope");
+							save_ext.writeExt(curr_time , data_save, "gyro");
 							
 							data_save = "";
 						}
@@ -263,7 +265,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
 							//save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
-							save_ext.writeExt(curr_time , data_save, "magnetometer");
+							//save_ext.writeExt(curr_time , data_save, "magnetometer");
+							save_ext.writeExt(curr_time , data_save, "magnet");
 							
 							data_save = "";
 						}
@@ -750,7 +753,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					end_log = true;
 					alert_log = log_dialog.dialog(this, "Alert", "Log has Started.");
 					
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+					//save timestamp on start log
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH-mm");
 					curr_time = sdf.format(new Date());
 				}
 				else
