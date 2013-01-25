@@ -64,16 +64,18 @@ public class SaveExt {
 	 * @param file_content	content to write to file (includes timestamp)
 	 * @param filename		filename to write contents into
 	 */
-	public void writeExt(String date, String file_content, String filename) {
+	public void writeExt(String timestamp, String file_content, String filename) {
 
 		String path = Environment.getExternalStorageDirectory().toString();
 		
 	    if (mExtWrite == true) {
 	        try {
-	            File file = new File(path, pathname);
+	        	
+	        	String[] date = timestamp.split(" ");
+	            File file = new File(path, pathname + "/" + date[0] + "/" + date[1]);
 	            if(!file.exists())
 	            	file.mkdirs();
-	            File writeFile = new File(file, date + "_" + filename + ".txt");
+	            File writeFile = new File(file, timestamp + "_" + filename + ".txt");
 	            BufferedOutputStream fw = new BufferedOutputStream(new FileOutputStream(writeFile, true));
 	            //BufferedWriter fw = new BufferedWriter(new FileWriter(writeFile));
 	            fw.write(file_content.getBytes());
