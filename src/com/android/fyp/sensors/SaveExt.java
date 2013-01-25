@@ -60,21 +60,20 @@ public class SaveExt {
 	
 	/**
 	 * Write Sensor Data to file
-	 * @param file_content	content to write to file
+	 * @param date			current date to store as filename
+	 * @param file_content	content to write to file (includes timestamp)
 	 * @param filename		filename to write contents into
 	 */
-	public void writeExt(String file_content, String filename) {
-		
+	public void writeExt(String date, String file_content, String filename) {
+
 		String path = Environment.getExternalStorageDirectory().toString();
-		
-		Log.d("FILENAME", path);
 		
 	    if (mExtWrite == true) {
 	        try {
 	            File file = new File(path, pathname);
 	            if(!file.exists())
 	            	file.mkdirs();
-	            File writeFile = new File(file, filename + ".txt");
+	            File writeFile = new File(file, date + "_" + filename + ".txt");
 	            BufferedOutputStream fw = new BufferedOutputStream(new FileOutputStream(writeFile, true));
 	            //BufferedWriter fw = new BufferedWriter(new FileWriter(writeFile));
 	            fw.write(file_content.getBytes());
