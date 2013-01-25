@@ -351,7 +351,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		layout.addView(graphView);
  		
  		acc_y = new GraphViewSeries("acc_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
- 		acc_z = new GraphViewSeries("acc_z", null, new GraphViewData[] {});
  		
 		// LineGraphView( context, heading)
 		graphView = new LineGraphView(this, "Accelerometer Data") {
