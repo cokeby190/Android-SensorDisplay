@@ -3,273 +3,344 @@
     android:id="@+id/SCROLLER_sensor"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:scrollbars="vertical"
-    android:fillViewport="true">
-    
-<LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:fillViewport="true"
+    android:scrollbars="vertical" >
 
-   <!-- <Button
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <!--
+        <Button
         android:id="@+id/b_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/blue_button"
-        android:text="Display" /> -->
+        android:text="Display" />
+        -->
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content" >
-
-       <Button
-           android:id="@+id/b_start_log"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:background="@drawable/red_button"
-           android:text="Start Log"
-           android:layout_margin="10dp" />
-
-       <Button
-           android:id="@+id/b_end_log"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:background="@drawable/red_button"
-           android:text="End Log" 
-           android:layout_margin="10dp"/>
-
-   </LinearLayout>
-
-    <TextView
-        android:id="@+id/sensor_list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello" />
-
-    <TextView
-        android:id="@+id/sensor_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="\n\nNumber of sensors detected: 0" 
-        android:layout_marginBottom="20dp"/>
-
-    <Button
-        android:id="@+id/accelerometer_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Accelerometer Information" />"
-
-	<!-- Graph -->        
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/b_start_log"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/red_button"
+                android:text="Start Log" />
+
+            <Button
+                android:id="@+id/b_end_log"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/red_button"
+                android:text="End Log" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/b_start_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/blue_button"
+                android:text="Start LEFT" />
+
+            <Button
+                android:id="@+id/b_end_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/blue_button"
+                android:text="End LEFT" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/b_start_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/green_button"
+                android:text="Start RIGHT" />
+
+            <Button
+                android:id="@+id/b_end_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/green_button"
+                android:text="End RIGHT" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/sensor_list"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content"
+            android:text="@string/hello" />
+
+        <TextView
+            android:id="@+id/sensor_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="\n\nNumber of sensors detected: 0" />
+
+        <Button
+            android:id="@+id/accelerometer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Accelerometer Information" />
+
+        <!-- Graph -->
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/acc_graph_x"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/acc_graph_x"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/acc_graph_y"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/acc_graph_y"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/acc_graph_z"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <TextView
-        android:id="@+id/accelerometer_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/gyroscope_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Gyroscope Information" />
+                <LinearLayout
+                    android:id="@+id/acc_graph_z"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
 
-    <!-- Graph -->        
+        <TextView
+            android:id="@+id/accelerometer_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+        <Button
+            android:id="@+id/gyroscope_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Gyroscope Information" />
+
+        <!-- Graph -->
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/gyro_graph_x"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/gyro_graph_x"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/gyro_graph_y"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/gyro_graph_y"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/gyro_graph_z"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <TextView
-        android:id="@+id/gyroscope_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/magnetometer_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Magnetometer Information" />
+                <LinearLayout
+                    android:id="@+id/gyro_graph_z"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
 
-    <!-- Graph -->        
-
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+        </ScrollView>
+        
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/mag_graph_x"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/gyro_graph_angle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/gyroscope_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/magnetometer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Magnetometer Information" />
+
+        <!-- Graph -->
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/mag_graph_y"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        <LinearLayout
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/mag_graph_x"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="fill_parent" >
 
             <LinearLayout
-                android:id="@+id/mag_graph_z"
                 android:layout_width="fill_parent"
-                android:layout_height="250dip" />
-        </LinearLayout>
-    </ScrollView>
-    
-    <TextView
-        android:id="@+id/magnetometer_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/light_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Light Sensor Information" />
+                <LinearLayout
+                    android:id="@+id/mag_graph_y"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
 
-    <TextView
-        android:id="@+id/light_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
 
-    <Button
-        android:id="@+id/proximity_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Proximity Sensor Information" />
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/proximity_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
-    
-    <Button
-        android:id="@+id/temp_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/blue_button"
-        android:text="Temperature Sensor Information" />
+                <LinearLayout
+                    android:id="@+id/mag_graph_z"
+                    android:layout_width="fill_parent"
+                    android:layout_height="250dip" />
+            </LinearLayout>
+        </ScrollView>
 
-    <TextView
-        android:id="@+id/temp_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+        <TextView
+            android:id="@+id/magnetometer_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/light_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Light Sensor Information" />
+
+        <TextView
+            android:id="@+id/light_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/proximity_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Proximity Sensor Information" />
+
+        <TextView
+            android:id="@+id/proximity_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/temp_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_button"
+            android:text="Temperature Sensor Information" />
+
+        <TextView
+            android:id="@+id/temp_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+    </LinearLayout>
+
 </ScrollView>

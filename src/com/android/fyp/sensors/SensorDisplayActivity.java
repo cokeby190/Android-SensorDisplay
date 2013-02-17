@@ -61,7 +61,17 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private boolean start_log = false;
 	private boolean end_log = false;
 	private Button b_acc, b_gyro, b_magnet, b_light, b_prox, b_temp;
+	private Button b_start_left, b_end_left, b_start_right, b_end_right;
 	private Button b_display;
+	
+	//Gyropscope
+	// Create a constant to convert nanoseconds to seconds.
+	private static final float NS2S = 1.0f / 1000000000.0f;
+	private final float[] deltaRotationVector = new float[4];
+	private float timestamp;
+	public static final float EPSILON = 0.000000001f;
+	private double angle = 0.0;
+	private final float rad2deg = (float) (180.0f / Math.PI);
 	
 	//Dialog 
 	DialogAct show_dialog;
@@ -72,7 +82,9 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//Save to External Mem
 	SaveExt save_ext;
 	String data_save = "";
+	String data_log = "";
 	String curr_time;
+	String log_time;
 	
 	//Power Manager - to prevent the screen sleeping and stop collecting data
 	PowerManager.WakeLock wl;
@@ -86,7 +98,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//Graph
 	private GraphView graphView;
 	private GraphViewSeries acc_x, acc_y, acc_z;
-	private GraphViewSeries gyro_x, gyro_y, gyro_z;
+	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private GraphViewSeries mag_x, mag_y, mag_z;
 
     @Override
@@ -203,7 +215,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
-						Log.d("LOG", start_log + " " + end_log);
+						//Log.d("LOG", start_log + " " + end_log);
 						if(start_log == true && end_log == true) {
 							Log.d("LOG_ACC", start_log + " " + end_log);
 							//save to SD
@@ -223,15 +235,99 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						break;
 					case Sensor.TYPE_GYROSCOPE:
 						
+						final float currentRotVector[] =  { 1, 0, 0, 0 };
+						
 						x = event.values[0];
 						y = event.values[1];
 						z = event.values[2];
 						
-						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n");
+						// Axis of the rotation sample, not normalized yet.
+						float axisX = event.values[0];
+						float axisY = event.values[1];
+						float axisZ = event.values[2];
+						
+						double RotAngle = 0.00;
+						
+						// This timestep's delta rotation to be multiplied by the current rotation
+						// after computing it from the gyro sample data.
+						if (timestamp != 0) {
+							
+							final float dT = (event.timestamp - timestamp) * NS2S;
+							
+							angle += (z*dT) * rad2deg ;
+							
+							// Calculate the angular speed of the sample
+						    float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+
+						    // Normalize the rotation vector if it's big enough to get the axis
+						    // (that is, EPSILON should represent your maximum allowable margin of error)
+						    if (omegaMagnitude > EPSILON) {
+						    	axisX /= omegaMagnitude;
+						    	axisY /= omegaMagnitude;
+						    	axisZ /= omegaMagnitude;
+						    }
+						    
+						    // Integrate around this axis with the angular speed by the timestep
+						    // in order to get a delta rotation from this sample over the timestep
+						    // We will convert this axis-angle representation of the delta rotation
+						    // into a quaternion before turning it into the rotation matrix.
+						    float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+						    float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
+						    float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
+						    deltaRotationVector[0] = sinThetaOverTwo * axisX;
+						    deltaRotationVector[1] = sinThetaOverTwo * axisY;
+						    deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+						    deltaRotationVector[3] = cosThetaOverTwo;
+						    
+						    currentRotVector[0] = deltaRotationVector[0] * currentRotVector[0] - 
+			                          deltaRotationVector[1] * currentRotVector[1] - 
+			                          deltaRotationVector[2] * currentRotVector[2] - 
+			                          deltaRotationVector[3] * currentRotVector[3];
+
+			    currentRotVector[1] = deltaRotationVector[0] * currentRotVector[1] + 
+			                          deltaRotationVector[1] * currentRotVector[0] + 
+			                          deltaRotationVector[2] * currentRotVector[3] - 
+			                          deltaRotationVector[3] * currentRotVector[2];
+
+			    currentRotVector[2] = deltaRotationVector[0] * currentRotVector[2] - 
+			                          deltaRotationVector[1] * currentRotVector[3] + 
+			                          deltaRotationVector[2] * currentRotVector[0] + 
+			                          deltaRotationVector[3] * currentRotVector[1];
+
+			    currentRotVector[3] = deltaRotationVector[0] * currentRotVector[3] + 
+			                          deltaRotationVector[1] * currentRotVector[2] - 
+			                          deltaRotationVector[2] * currentRotVector[1] + 
+			                          deltaRotationVector[3] * currentRotVector[0];
+			    final float rad2deg = (float) (180.0f / Math.PI);
+			    RotAngle = currentRotVector[0] * rad2deg;
+			    axisX = currentRotVector[1];
+			    axisY = currentRotVector[2];
+			    axisZ = currentRotVector[3];
+
+//			    Log.d("GYROSCOPE_INITIAL", "X: " + x + //
+//				        " Y: " + y + //
+//				                    " Z: " + z );
+//			    Log.d("GYROSCOPE", "axisX: " + axisX + //
+//			        " axisY: " + axisY + //
+//			                    " axisZ: " + axisZ + //
+//			        " RotAngle: " + RotAngle);
+						}
+    
+						timestamp = event.timestamp;
+						float[] deltaRotationMatrix = new float[9];
+						SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+						// User code should concatenate the delta rotation we computed with the current rotation
+						// in order to get the updated rotation.
+						// rotationCurrent = rotationCurrent * deltaRotationMatrix;
+						x = (x * deltaRotationMatrix[0]) + (x * deltaRotationMatrix[1]) + (x * deltaRotationMatrix[2]);
+						y = (y * deltaRotationMatrix[3]) + (y * deltaRotationMatrix[4]) + (y * deltaRotationMatrix[5]);
+						z = (z * deltaRotationMatrix[6]) + (z * deltaRotationMatrix[7]) + (z * deltaRotationMatrix[8]);
+
+						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n" + "RotAngle : " + angle + "\n\n");
 						
 						if(start_log == true && end_log == true) {
 							//save to SD
-							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
+							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\t" + "angle," + angle + "\n";
 							//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
 							//save_ext.writeExt(curr_time , data_save, "gyroscope");
 							save_ext.writeExt(curr_time , data_save, "gyro");
@@ -240,9 +336,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						}
 						
 						//append data to graph
-						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), axisX), true);
+						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), axisY), true);
+						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), axisZ), true);
+						gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle), true);
 
 						break;
 					case Sensor.TYPE_LIGHT:
@@ -411,6 +508,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
  		gyro_x = new GraphViewSeries("gyro_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
  		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
  		gyro_z = new GraphViewSeries("gyro_z", null ,new GraphViewData[] {});
+ 		gyro_angle = new GraphViewSeries("gyro_angle", new GraphViewStyle(Color.rgb(200, 50, 00), 3) ,new GraphViewData[] {});
  		
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Gyroscope Data") {
@@ -478,6 +576,30 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 		// graphView.setScalable(true);
 
 		layout = (LinearLayout) findViewById(R.id.gyro_graph_z);
+		layout.addView(graphView);
+		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_angle); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
 		layout.addView(graphView);
 			
  		/**------------------------------------------------------------------------------------------------------**
@@ -623,6 +745,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	b_prox = (Button) findViewById(R.id.proximity_button);
     	b_temp = (Button) findViewById(R.id.temp_button);
     	
+    	b_start_left = (Button) findViewById(R.id.b_start_left);
+    	b_end_left = (Button) findViewById(R.id.b_end_left);
+    	b_start_right = (Button) findViewById(R.id.b_start_right);
+    	b_end_right = (Button) findViewById(R.id.b_end_right);
+    	
     	//b_display = (Button) findViewById(R.id.b_display);
     	
     	//b_display.setOnClickListener(this);
@@ -745,7 +872,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 //				startActivity(display);
 //				break;
 			case R.id.b_start_log:
-				Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
+				//Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
 				if(start_log == false && end_log == false) {
 					start_log = true;
 					end_log = true;
@@ -762,7 +889,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 				break;
 			case R.id.b_end_log:
-				Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
+				//Log.d("LOG", "START LOG : " + start_log + "END_LOG : " + end_log);
 				if(start_log == true && end_log == true) {
 					end_log = false;
 					start_log = false;
@@ -776,6 +903,16 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 				alert_log.show();
 				
+				break;
+				
+			case R.id.b_start_left:
+				data_log += time_stamp("time") + "\t" + "current time" + "\t" + "\n";
+				//save timestamp on start log
+				SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH-mm");
+				log_time = sdf.format(new Date());
+				save_ext.writeExt(log_time , data_log, "log_time");
+				break;
+			case R.id.b_end_left:
 				break;
 			case R.id.accelerometer_button:
 				show_data(mAcc, Sensor.TYPE_ACCELEROMETER, "Accelerometer");
