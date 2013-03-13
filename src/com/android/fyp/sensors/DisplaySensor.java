@@ -82,7 +82,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private final float[] deltaRotationVector = new float[4];
 	private float timestamp;
 	public static final float EPSILON = 0.000000001f;
-	private double angle = 0.0;
+	private double angle_x, angle_y, angle_z;
 	private final float rad2deg = (float) (180.0f / Math.PI);
 	private int count = 0;
 	private gyro_data[] window = new gyro_data[10];
@@ -112,7 +112,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	//Graph
 	private GraphView graphView;
 	private GraphViewSeries acc_x, acc_y, acc_z;
-	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle, gyro_line;
+	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private GraphViewSeries mag_x, mag_y, mag_z;
 	private GraphViewSeries orient_x, orient_y, orient_z;
 
@@ -286,11 +286,11 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						}							
 						
 						// Axis of the rotation sample, not normalized yet.
-						float axisX = event.values[0];
-						float axisY = event.values[1];
-						float axisZ = event.values[2];
-						
-						double RotAngle = 0.00;
+//						float axisX = event.values[0];
+//						float axisY = event.values[1];
+//						float axisZ = event.values[2];
+//						
+//						double RotAngle = 0.00;
 						
 						// This timestep's delta rotation to be multiplied by the current rotation
 						// after computing it from the gyro sample data.
@@ -298,59 +298,61 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							
 							final float dT = (event.timestamp - timestamp) * NS2S;
 							
-							angle += (z*dT) * rad2deg ;
+							angle_x += (x*dT) * rad2deg;
+							angle_y += (y*dT) * rad2deg;
+							angle_z += (z*dT) * rad2deg;
 							
-							// Calculate the angular speed of the sample
-						    float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
-
-						    // Normalize the rotation vector if it's big enough to get the axis
-						    // (that is, EPSILON should represent your maximum allowable margin of error)
-						    if (omegaMagnitude > EPSILON) {
-						    	axisX /= omegaMagnitude;
-						    	axisY /= omegaMagnitude;
-						    	axisZ /= omegaMagnitude;
-						    }
-						    
-						    // Integrate around this axis with the angular speed by the timestep
-						    // in order to get a delta rotation from this sample over the timestep
-						    // We will convert this axis-angle representation of the delta rotation
-						    // into a quaternion before turning it into the rotation matrix.
-						    float thetaOverTwo = omegaMagnitude * dT / 2.0f;
-						    float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
-						    float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
-						    deltaRotationVector[0] = sinThetaOverTwo * axisX;
-						    deltaRotationVector[1] = sinThetaOverTwo * axisY;
-						    deltaRotationVector[2] = sinThetaOverTwo * axisZ;
-						    deltaRotationVector[3] = cosThetaOverTwo;
-						    
-							currentRotVector[0] = deltaRotationVector[0]
-									* currentRotVector[0] - deltaRotationVector[1]
-									* currentRotVector[1] - deltaRotationVector[2]
-									* currentRotVector[2] - deltaRotationVector[3]
-									* currentRotVector[3];
-	
-							currentRotVector[1] = deltaRotationVector[0]
-									* currentRotVector[1] + deltaRotationVector[1]
-									* currentRotVector[0] + deltaRotationVector[2]
-									* currentRotVector[3] - deltaRotationVector[3]
-									* currentRotVector[2];
-	
-							currentRotVector[2] = deltaRotationVector[0]
-									* currentRotVector[2] - deltaRotationVector[1]
-									* currentRotVector[3] + deltaRotationVector[2]
-									* currentRotVector[0] + deltaRotationVector[3]
-									* currentRotVector[1];
-	
-							currentRotVector[3] = deltaRotationVector[0]
-									* currentRotVector[3] + deltaRotationVector[1]
-									* currentRotVector[2] - deltaRotationVector[2]
-									* currentRotVector[1] + deltaRotationVector[3]
-									* currentRotVector[0];
-							final float rad2deg = (float) (180.0f / Math.PI);
-							RotAngle = currentRotVector[0] * rad2deg;
-							axisX = currentRotVector[1];
-							axisY = currentRotVector[2];
-							axisZ = currentRotVector[3];
+//							// Calculate the angular speed of the sample
+//						    float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+//
+//						    // Normalize the rotation vector if it's big enough to get the axis
+//						    // (that is, EPSILON should represent your maximum allowable margin of error)
+//						    if (omegaMagnitude > EPSILON) {
+//						    	axisX /= omegaMagnitude;
+//						    	axisY /= omegaMagnitude;
+//						    	axisZ /= omegaMagnitude;
+//						    }
+//						    
+//						    // Integrate around this axis with the angular speed by the timestep
+//						    // in order to get a delta rotation from this sample over the timestep
+//						    // We will convert this axis-angle representation of the delta rotation
+//						    // into a quaternion before turning it into the rotation matrix.
+//						    float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+//						    float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
+//						    float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
+//						    deltaRotationVector[0] = sinThetaOverTwo * axisX;
+//						    deltaRotationVector[1] = sinThetaOverTwo * axisY;
+//						    deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+//						    deltaRotationVector[3] = cosThetaOverTwo;
+//						    
+//							currentRotVector[0] = deltaRotationVector[0]
+//									* currentRotVector[0] - deltaRotationVector[1]
+//									* currentRotVector[1] - deltaRotationVector[2]
+//									* currentRotVector[2] - deltaRotationVector[3]
+//									* currentRotVector[3];
+//	
+//							currentRotVector[1] = deltaRotationVector[0]
+//									* currentRotVector[1] + deltaRotationVector[1]
+//									* currentRotVector[0] + deltaRotationVector[2]
+//									* currentRotVector[3] - deltaRotationVector[3]
+//									* currentRotVector[2];
+//	
+//							currentRotVector[2] = deltaRotationVector[0]
+//									* currentRotVector[2] - deltaRotationVector[1]
+//									* currentRotVector[3] + deltaRotationVector[2]
+//									* currentRotVector[0] + deltaRotationVector[3]
+//									* currentRotVector[1];
+//	
+//							currentRotVector[3] = deltaRotationVector[0]
+//									* currentRotVector[3] + deltaRotationVector[1]
+//									* currentRotVector[2] - deltaRotationVector[2]
+//									* currentRotVector[1] + deltaRotationVector[3]
+//									* currentRotVector[0];
+//							final float rad2deg = (float) (180.0f / Math.PI);
+//							RotAngle = currentRotVector[0] * rad2deg;
+//							axisX = currentRotVector[1];
+//							axisY = currentRotVector[2];
+//							axisZ = currentRotVector[3];
 	
 							// Log.d("GYROSCOPE_INITIAL", "X: " + x + //
 							// " Y: " + y + //
@@ -362,8 +364,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						}
     
 						timestamp = event.timestamp;
-						float[] deltaRotationMatrix = new float[9];
-						SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+//						float[] deltaRotationMatrix = new float[9];
+//						SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
 						// User code should concatenate the delta rotation we computed with the current rotation
 						// in order to get the updated rotation.
 						// rotationCurrent = rotationCurrent * deltaRotationMatrix;
@@ -371,11 +373,13 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //						y = (y * deltaRotationMatrix[3]) + (y * deltaRotationMatrix[4]) + (y * deltaRotationMatrix[5]);
 //						z = (z * deltaRotationMatrix[6]) + (z * deltaRotationMatrix[7]) + (z * deltaRotationMatrix[8]);
 
-						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n" + "RotAngle : " + angle + "\n\n");
+						//tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n" + "RotAngle : " + angle + "\n\n");
+						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + angle_x + " (rad/s) \ny-axis: " + angle_y + " (rad/s) \nz-axis: " + angle_z + " (rad/s) \n\n");
 						
 						if(start_log == true && end_log == true) {
 							//save to SD
-							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\t" + "angle," + angle + "\n";
+							//data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\t" + "angle," + angle + "\n";
+							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
 							//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
 							//save_ext.writeExt(curr_time , data_save, "gyroscope");
 							save_ext.writeExt(curr_time , data_save, "gyro");
@@ -387,8 +391,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
 						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
-						gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle), true);
-						gyro_line.appendData(new GraphViewData(max_time, max), true);
+						//gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle), true);
+						//gyro_line.appendData(new GraphViewData(max_time, max), true);
 						
 						break;
 					case Sensor.TYPE_LIGHT:
@@ -687,7 +691,6 @@ public class DisplaySensor extends Activity implements OnClickListener {
  		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
  		gyro_z = new GraphViewSeries("gyro_z", null ,new GraphViewData[] {});
  		gyro_angle = new GraphViewSeries("gyro_angle", new GraphViewStyle(Color.rgb(200, 50, 00), 3) ,new GraphViewData[] {});
- 		gyro_line = new GraphViewSeries("gyro_line", new GraphViewStyle(Color.rgb(255, 255, 255), 3) ,new GraphViewData[] {});
  		
  		// LineGraphView( context, heading)
  		graphView = new LineGraphView(this, "Gyroscope Data") {
@@ -757,29 +760,29 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		layout = (LinearLayout) findViewById(R.id.gyro_graph_z);
 		layout.addView(graphView);
 		
-		// LineGraphView( context, heading)
-		graphView = new LineGraphView(this, "Gyroscope Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-
-			@Override
-			protected String formatLabel(double value, boolean isValueX) {
-				if (isValueX)
-					return formatter.format(value); // convert unix time to
-													// human time
-				else
-					return super.formatLabel(value, isValueX); // let the
-																// y-value be
-																// normal-formatted
-			}
-		};
-
-		graphView.addSeries(gyro_angle); // data
-		graphView.setScrollable(true);
-		graphView.setViewPort(1, 80000);
-		// graphView.setScalable(true);
-
-		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
-		layout.addView(graphView);
+//		// LineGraphView( context, heading)
+//		graphView = new LineGraphView(this, "Gyroscope Data") {
+//			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+//
+//			@Override
+//			protected String formatLabel(double value, boolean isValueX) {
+//				if (isValueX)
+//					return formatter.format(value); // convert unix time to
+//													// human time
+//				else
+//					return super.formatLabel(value, isValueX); // let the
+//																// y-value be
+//																// normal-formatted
+//			}
+//		};
+//
+//		graphView.addSeries(gyro_angle); // data
+//		graphView.setScrollable(true);
+//		graphView.setViewPort(1, 80000);
+//		// graphView.setScalable(true);
+//
+//		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
+//		layout.addView(graphView);
 			
  		/**------------------------------------------------------------------------------------------------------**
  		 * 	-------------------------------------| MAGNETOMETER GRAPH |-------------------------------------------*
