@@ -54,6 +54,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private List<Sensor> deviceSensors;
 	private Sensor mAcc, mGyro, mMagnet, mLight, mProx, mTemp;
 	
+	//Caliberated values;
+	private float[] cal_acc = new float[3];
+	private float[] cal_gyro = new float[3];
+	
 	//UI Elements
 	private TextView sensor_no;
 	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp, tv_orientation;
@@ -122,6 +126,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
         
         //initialise UI elements
         initialize();
+        
+        getData();
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
        
@@ -143,10 +149,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
         deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         
         //print out sensor types (int) in LOG
-        for (Sensor sensor : deviceSensors) {
-            Log.v("Sensors", "" + sensor.getType());
-        }
-        
+//        for (Sensor sensor : deviceSensors) {
+//            Log.v("Sensors", "" + sensor.getType());
+//        }
+//        
         //Register Sensor Listener for all the sensors in the device. 
         for (Sensor sensor : deviceSensors) {
 			//mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -855,6 +861,17 @@ public class DisplaySensor extends Activity implements OnClickListener {
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
     
+    private void getData() {
+    	
+    	Bundle getdata = getIntent().getExtras();
+    	if(getdata.getFloatArray("Acc") != null) {
+    		cal_acc = getdata.getFloatArray("Acc");
+    	}
+    	if(getdata.getFloatArray("Gyro") != null) {
+    		cal_gyro = getdata.getFloatArray("Gyro");
+    	}
+    	
+    }
     
     //-------------------------------------------------------------------------------------------//
     //									 | LOCATION LISTENER |									 //	

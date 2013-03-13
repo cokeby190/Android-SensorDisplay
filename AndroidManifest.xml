@@ -27,7 +27,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".displayGraph"
+            android:name=".DisplaySensor"
             android:label="@string/app_name" >
         </activity>
     </application>
