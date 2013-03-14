@@ -86,6 +86,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private final float rad2deg = (float) (180.0f / Math.PI);
 	private int count = 0;
 	private gyro_data[] window = new gyro_data[10];
+	private float dT;
 	
 	//Dialog 
 	DialogAct show_dialog;
@@ -226,11 +227,23 @@ public class DisplaySensor extends Activity implements OnClickListener {
 				switch(event.sensor.getType()) {
 					case Sensor.TYPE_ACCELEROMETER:
 						
-						x = event.values[0];
-						y = event.values[1];
-						z = event.values[2];
-						
-						aData = event.values.clone();
+						if(cal_acc != null) {
+							x = event.values[0] - cal_acc[0];
+							y = event.values[1] - cal_acc[1];
+							z = event.values[2] - cal_acc[2];
+							Log.d("CAL_ACC_X", (event.values[0] - cal_acc[0]) + "");
+							
+							aData = event.values.clone();
+						}else {
+							x = event.values[0];
+							y = event.values[1];
+							z = event.values[2];
+							Log.d("ACC_X", event.values[0] + "");
+							
+							aData = event.values.clone();
+						}
+																		
+						//aData = event.values.clone();
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
@@ -296,7 +309,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						// after computing it from the gyro sample data.
 						if (timestamp != 0) {
 							
-							final float dT = (event.timestamp - timestamp) * NS2S;
+							dT = (event.timestamp - timestamp) * NS2S;
 							
 							angle_x += (x*dT) * rad2deg;
 							angle_y += (y*dT) * rad2deg;
@@ -444,10 +457,18 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						break;
 				}
 				
-				if(aData!=null && mData!=null) {
+				if(aData!=null && mData!=null) {					
+					
+					float b = (float) 0.98;
+					
+					OrientValues[0] = b * (OrientValues[0] + gData[0]*dT) + (1 - b) *(aData[0]);
+					OrientValues[1] = b * (OrientValues[1] + gData[1]*dT) + (1 - b) *(aData[1]);
+					OrientValues[2] = b * (OrientValues[2] + gData[2]*dT) + (1 - b) *(aData[2]);
+					
+					
 		        	//SensorManager.getRotationMatrix(Rmat, Imat, aData, mData);
-		        	SensorManager.getRotationMatrix(Rmat, null, aData, mData);
-		        	SensorManager.getOrientation(Rmat, OrientValues);
+		        	//SensorManager.getRotationMatrix(Rmat, null, aData, mData);
+		        	//SensorManager.getOrientation(Rmat, OrientValues);
 //		        	
 //		        	Log.d("acc_x", aData[0] + "");
 //		        	Log.d("acc_y", aData[0] + "");
@@ -869,6 +890,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
     	Bundle getdata = getIntent().getExtras();
     	if(getdata.getFloatArray("Acc") != null) {
     		cal_acc = getdata.getFloatArray("Acc");
+    		Log.d("ACC_X", cal_acc[0] + "");
+    		Log.d("ACC_Y", cal_acc[1] + "");
+    		Log.d("ACC_Z", cal_acc[2] + "");
     	}
     	if(getdata.getFloatArray("Gyro") != null) {
     		cal_gyro = getdata.getFloatArray("Gyro");
