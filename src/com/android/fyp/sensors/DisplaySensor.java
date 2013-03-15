@@ -87,7 +87,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		change_x, change_y, change_z;
 	private final float rad2deg = (float) (180.0f / Math.PI);
 	private int count = 0;
-	private gyro_data[] window = new gyro_data[10];
+	private gyro_data[] window = new gyro_data[2];
 	private float dT;
 	private String turn_string = "";
 	
@@ -367,7 +367,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							// " RotAngle: " + RotAngle);
 						}
 						
-						if(count < 10)
+						if(count < 2)
 							window[count] = new gyro_data(x,y,z);
 						
 						count++; 
@@ -375,13 +375,13 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						double max = -10000000;
 						double min = 10000000;
 						//minimal vertical distance between two peaks
-						double dist = 0.08;
+						double dist = 0.1;
 						long max_time = 0;
 						double max_ignore = 0.05;
 						double min_ignore = -0.05;
 						
-						if(count == 10) {
-							for(int i=0; i<10; i++) {
+						if(count == 2) {
+							for(int i=0; i<2; i++) {
 								if(window[i].z > max)
 									max = window[i].z;
 								else if(window[i].z < min)
@@ -400,7 +400,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 										turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 									}
 									max = window[i].z;
-									max_time = System.currentTimeMillis();
+									//max_time = System.currentTimeMillis();
 									prev_z = angle_z;
 									
 								} else if(window[i].z > min + dist) {
