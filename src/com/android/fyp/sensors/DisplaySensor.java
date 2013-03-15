@@ -373,34 +373,46 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						count++; 
 
 						double max = -10000000;
-						double dist = 0.5;
+						double min = 10000000;
+						//minimal vertical distance between two peaks
+						double dist = 0.08;
 						long max_time = 0;
-						
-						
+						double max_ignore = 0.05;
+						double min_ignore = -0.05;
 						
 						if(count == 10) {
 							for(int i=0; i<10; i++) {
 								if(window[i].z > max)
 									max = window[i].z;
+								else if(window[i].z < min)
+									min = window[i].z;
 								if(window[i].z < max - dist) {
-									if((prev_z - angle_z) > 0)
 									//Log.d("PEAK", window[i].z + "");
 									//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
 									//if(angle_z > 0)
-									if((prev_z - angle_z) < 0) {
-										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
-										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
-									}
+//									if((prev_z - angle_z) < 0) {
+//										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+//										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+//									}
 									//else if(angle_z < 0)
-									else if((prev_z - angle_z) > 0) {
+									if((prev_z - angle_z) > 0) {
 										Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
 										turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 									}
 									max = window[i].z;
 									max_time = System.currentTimeMillis();
 									prev_z = angle_z;
-									tv_gyro_turns.setText(turn_string);
+									
+								} else if(window[i].z > min + dist) {
+									if((prev_z - angle_z) < 0) {
+										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+									}
+									min = window[i].z;
+									prev_z = angle_z;
 								}
+								
+								tv_gyro_turns.setText(turn_string);
 							}
 							count = 0;
 						}						
