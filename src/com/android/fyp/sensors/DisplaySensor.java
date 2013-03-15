@@ -60,7 +60,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	
 	//UI Elements
 	private TextView sensor_no;
-	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp, tv_orientation;
+	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp, tv_orientation,
+		tv_gyro_turns;
 	private Button b_start_log, b_end_log;
 	private boolean start_log = false;
 	private boolean end_log = false;
@@ -82,11 +83,13 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private final float[] deltaRotationVector = new float[4];
 	private float timestamp;
 	public static final float EPSILON = 0.000000001f;
-	private double angle_x, angle_y, angle_z;
+	private double angle_x, angle_y, angle_z, prev_x, prev_y, prev_z,
+		change_x, change_y, change_z;
 	private final float rad2deg = (float) (180.0f / Math.PI);
 	private int count = 0;
 	private gyro_data[] window = new gyro_data[10];
 	private float dT;
+	private String turn_string = "";
 	
 	//Dialog 
 	DialogAct show_dialog;
@@ -231,14 +234,17 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							x = event.values[0] - cal_acc[0];
 							y = event.values[1] - cal_acc[1];
 							z = event.values[2] - cal_acc[2];
-							Log.d("CAL_ACC_X", (event.values[0] - cal_acc[0]) + "");
+							//Log.d("CAL_ACC_X", (event.values[0] - cal_acc[0]) + "");
 							
-							aData = event.values.clone();
+							aData[0] = event.values[0] - cal_acc[0];
+							aData[1] = event.values[1] - cal_acc[1];
+							aData[2] = event.values[2] - cal_acc[2];
+							
 						}else {
 							x = event.values[0];
 							y = event.values[1];
 							z = event.values[2];
-							Log.d("ACC_X", event.values[0] + "");
+							//Log.d("ACC_X", event.values[0] + "");
 							
 							aData = event.values.clone();
 						}
@@ -267,7 +273,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						break;
 					case Sensor.TYPE_GYROSCOPE:
 						
-						final float currentRotVector[] =  { 1, 0, 0, 0 };
+//						final float currentRotVector[] =  { 1, 0, 0, 0 };
 						
 						x = event.values[0];
 						y = event.values[1];
@@ -275,35 +281,16 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						
 						gData = event.values.clone();
 						
-						if(count < 10)
-							window[count] = new gyro_data(x,y,z);
-						
-						count++; 
-
-						double max = -10000000;
-						double dist = 8.0;
-						long max_time = 0;
-						
-						if(count == 10) {
-							for(int i=0; i<10; i++) {
-								if(window[i].z > max)
-									max = window[i].z;
-								if(window[i].z < max - dist) {
-									Log.d("PEAK", window[i].z + "");
-									//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
-									max = window[i].z;
-									max_time = System.currentTimeMillis();
-								}
-							}
-							count = 0;
-						}							
-						
 						// Axis of the rotation sample, not normalized yet.
 //						float axisX = event.values[0];
 //						float axisY = event.values[1];
 //						float axisZ = event.values[2];
 //						
 //						double RotAngle = 0.00;
+						
+//						prev_x = angle_x;
+//						prev_y = angle_y;
+//						prev_z = angle_z;
 						
 						// This timestep's delta rotation to be multiplied by the current rotation
 						// after computing it from the gyro sample data.
@@ -314,6 +301,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							angle_x += (x*dT) * rad2deg;
 							angle_y += (y*dT) * rad2deg;
 							angle_z += (z*dT) * rad2deg;
+							
+//							change_x = prev_x - angle_x;
+//							change_y = prev_y - angle_y;
+//							change_z = prev_z - angle_z;
 							
 //							// Calculate the angular speed of the sample
 //						    float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
@@ -375,6 +366,44 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							// " axisZ: " + axisZ + //
 							// " RotAngle: " + RotAngle);
 						}
+						
+						if(count < 10)
+							window[count] = new gyro_data(x,y,z);
+						
+						count++; 
+
+						double max = -10000000;
+						double dist = 0.5;
+						long max_time = 0;
+						
+						
+						
+						if(count == 10) {
+							for(int i=0; i<10; i++) {
+								if(window[i].z > max)
+									max = window[i].z;
+								if(window[i].z < max - dist) {
+									if((prev_z - angle_z) > 0)
+									//Log.d("PEAK", window[i].z + "");
+									//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
+									//if(angle_z > 0)
+									if((prev_z - angle_z) < 0) {
+										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+									}
+									//else if(angle_z < 0)
+									else if((prev_z - angle_z) > 0) {
+										Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
+										turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+									}
+									max = window[i].z;
+									max_time = System.currentTimeMillis();
+									prev_z = angle_z;
+									tv_gyro_turns.setText(turn_string);
+								}
+							}
+							count = 0;
+						}						
     
 						timestamp = event.timestamp;
 //						float[] deltaRotationMatrix = new float[9];
@@ -404,7 +433,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
 						gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
 						gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
-						//gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle), true);
+						gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle_z), true);
 						//gyro_line.appendData(new GraphViewData(max_time, max), true);
 						
 						break;
@@ -436,9 +465,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						}
 						
 						//append data to graph
-						mag_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
-						mag_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
-						mag_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
+//						mag_x.appendData(new GraphViewData(System.currentTimeMillis(), x), true);
+//						mag_y.appendData(new GraphViewData(System.currentTimeMillis(), y), true);
+//						mag_z.appendData(new GraphViewData(System.currentTimeMillis(), z), true);
 
 						break;
 					case Sensor.TYPE_PROXIMITY:
@@ -781,8 +810,61 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		layout = (LinearLayout) findViewById(R.id.gyro_graph_z);
 		layout.addView(graphView);
 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_angle); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
+		layout.addView(graphView);
+			
+// 		/**------------------------------------------------------------------------------------------------------**
+// 		 * 	-------------------------------------| MAGNETOMETER GRAPH |-------------------------------------------*
+// 		 *//*----------------------------------------------------------------------------------------------------*/	
+// 		
+// 		//Magnetometer graph
+// 		mag_x = new GraphViewSeries("mag_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
+// 		mag_y = new GraphViewSeries("mag_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
+// 		mag_z = new GraphViewSeries("mag_z", null ,new GraphViewData[] {});
+// 		
+// 		// LineGraphView( context, heading)
+// 		graphView = new LineGraphView(this, "Magnetometer Data") {
+// 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+// 			@Override
+// 			protected String formatLabel(double value, boolean isValueX) {
+// 				if (isValueX)
+// 					return formatter.format(value); 	// convert unix time to human time
+// 				else 
+//					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
+// 			}
+// 		};
+//
+// 		graphView.addSeries(mag_x); // data
+// 		graphView.setScrollable(true);
+// 		graphView.setViewPort(1, 80000);
+//		//graphView.setScalable(true);
+//
+// 		layout = (LinearLayout) findViewById(R.id.mag_graph_x);
+// 		layout.addView(graphView);
+// 		
 //		// LineGraphView( context, heading)
-//		graphView = new LineGraphView(this, "Gyroscope Data") {
+//		graphView = new LineGraphView(this, "Magnetometer Data") {
 //			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 //
 //			@Override
@@ -797,91 +879,38 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //			}
 //		};
 //
-//		graphView.addSeries(gyro_angle); // data
+//		graphView.addSeries(mag_y); // data
 //		graphView.setScrollable(true);
 //		graphView.setViewPort(1, 80000);
 //		// graphView.setScalable(true);
 //
-//		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
+//		layout = (LinearLayout) findViewById(R.id.mag_graph_y);
 //		layout.addView(graphView);
-			
- 		/**------------------------------------------------------------------------------------------------------**
- 		 * 	-------------------------------------| MAGNETOMETER GRAPH |-------------------------------------------*
- 		 *//*----------------------------------------------------------------------------------------------------*/	
- 		
- 		//Magnetometer graph
- 		mag_x = new GraphViewSeries("mag_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
- 		mag_y = new GraphViewSeries("mag_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
- 		mag_z = new GraphViewSeries("mag_z", null ,new GraphViewData[] {});
- 		
- 		// LineGraphView( context, heading)
- 		graphView = new LineGraphView(this, "Magnetometer Data") {
- 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
- 			@Override
- 			protected String formatLabel(double value, boolean isValueX) {
- 				if (isValueX)
- 					return formatter.format(value); 	// convert unix time to human time
- 				else 
-					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
- 			}
- 		};
-
- 		graphView.addSeries(mag_x); // data
- 		graphView.setScrollable(true);
- 		graphView.setViewPort(1, 80000);
-		//graphView.setScalable(true);
-
- 		layout = (LinearLayout) findViewById(R.id.mag_graph_x);
- 		layout.addView(graphView);
- 		
-		// LineGraphView( context, heading)
-		graphView = new LineGraphView(this, "Magnetometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-
-			@Override
-			protected String formatLabel(double value, boolean isValueX) {
-				if (isValueX)
-					return formatter.format(value); // convert unix time to
-													// human time
-				else
-					return super.formatLabel(value, isValueX); // let the
-																// y-value be
-																// normal-formatted
-			}
-		};
-
-		graphView.addSeries(mag_y); // data
-		graphView.setScrollable(true);
-		graphView.setViewPort(1, 80000);
-		// graphView.setScalable(true);
-
-		layout = (LinearLayout) findViewById(R.id.mag_graph_y);
-		layout.addView(graphView);
-
-		// LineGraphView( context, heading)
-		graphView = new LineGraphView(this, "Magnetometer Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-
-			@Override
-			protected String formatLabel(double value, boolean isValueX) {
-				if (isValueX)
-					return formatter.format(value); // convert unix time to
-													// human time
-				else
-					return super.formatLabel(value, isValueX); // let the
-																// y-value be
-																// normal-formatted
-			}
-		};
-
-		graphView.addSeries(mag_z); // data
-		graphView.setScrollable(true);
-		graphView.setViewPort(1, 80000);
-		// graphView.setScalable(true);
-
-		layout = (LinearLayout) findViewById(R.id.mag_graph_z);
-		layout.addView(graphView);
- 		
+//
+//		// LineGraphView( context, heading)
+//		graphView = new LineGraphView(this, "Magnetometer Data") {
+//			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+//
+//			@Override
+//			protected String formatLabel(double value, boolean isValueX) {
+//				if (isValueX)
+//					return formatter.format(value); // convert unix time to
+//													// human time
+//				else
+//					return super.formatLabel(value, isValueX); // let the
+//																// y-value be
+//																// normal-formatted
+//			}
+//		};
+//
+//		graphView.addSeries(mag_z); // data
+//		graphView.setScrollable(true);
+//		graphView.setViewPort(1, 80000);
+//		// graphView.setScalable(true);
+//
+//		layout = (LinearLayout) findViewById(R.id.mag_graph_z);
+//		layout.addView(graphView);
+// 		
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
     
@@ -956,6 +985,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
     	tv_temp = (TextView) findViewById(R.id.temp_text);
     	
     	tv_orientation = (TextView) findViewById(R.id.orientation_text);
+    	tv_gyro_turns = (TextView) findViewById(R.id.gyroscope_turns);
     	
     	b_acc = (Button) findViewById(R.id.accelerometer_button);
     	b_gyro = (Button) findViewById(R.id.gyroscope_button);
