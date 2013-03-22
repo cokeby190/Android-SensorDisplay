@@ -20,16 +20,17 @@ public class SaveExt {
 
 	boolean mExtAvail = false;
 	boolean mExtWrite = false;
-	public String pathname = "sensor_data";
+	private String pathname;
 	
-	Context getContext;
+	private Context getContext;
 	
 	/**
 	 * Class Constructor initialising Context from Activity
 	 * @param context	Context passed to Class from Activity (since class has no Context attribute)
 	 */
-	public SaveExt(Context context) { 
+	public SaveExt(Context context, String pathname) { 
 		this.getContext = context;
+		this.pathname = pathname;
 	}
 	
 	/**

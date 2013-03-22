@@ -87,7 +87,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		change_x, change_y, change_z;
 	private final float rad2deg = (float) (180.0f / Math.PI);
 	private int count = 0;
-	private gyro_data[] window = new gyro_data[2];
+	private gyro_data[] window = new gyro_data[20];
 	private float dT;
 	private String turn_string = "";
 	
@@ -98,6 +98,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	AlertDialog alert_log;
 	
 	//Save to External Mem
+	private static final String sensorlogpath = "sensor_data";
 	SaveExt save_ext;
 	String data_save = "";
 	String data_log = "";
@@ -119,6 +120,17 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private GraphViewSeries mag_x, mag_y, mag_z;
 	private GraphViewSeries orient_x, orient_y, orient_z;
+	
+	//State Transition
+	State prev_state, curr_state;	
+
+	double max = -10000000;
+	double min = 10000000;
+	//minimal vertical distance between two peaks
+	double dist = 0.05;
+	long max_time = 0;
+	double max_ignore = 0.05;
+	double min_ignore = -0.05;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,7 +152,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
         wl.acquire();
 
         //save data to SD card
-        save_ext = new SaveExt(this);
+        save_ext = new SaveExt(this, sensorlogpath);
         save_ext.setState();
         
         //Location Manager
@@ -288,9 +300,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //						
 //						double RotAngle = 0.00;
 						
-//						prev_x = angle_x;
-//						prev_y = angle_y;
-//						prev_z = angle_z;
+						prev_x = angle_x;
+						prev_y = angle_y;
+						prev_z = angle_z;
 						
 						// This timestep's delta rotation to be multiplied by the current rotation
 						// after computing it from the gyro sample data.
@@ -367,42 +379,129 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							// " RotAngle: " + RotAngle);
 						}
 						
-						if(count < 2)
-							window[count] = new gyro_data(x,y,z);
+//						if(count < 20)
+//							window[count] = new gyro_data(x,y,z);
+//						
+//						count++; 
+//
+//						double max = -10000000;
+//						double min = 10000000;
+//						//minimal vertical distance between two peaks
+//						double dist = 0.05;
+//						long max_time = 0;
+//						double max_ignore = 0.05;
+//						double min_ignore = -0.05;
 						
-						count++; 
-
-						double max = -10000000;
-						double min = 10000000;
-						//minimal vertical distance between two peaks
-						double dist = 0.05;
-						long max_time = 0;
-						double max_ignore = 0.05;
-						double min_ignore = -0.05;
-						
-						if(count == 2) {
-							for(int i=0; i<2; i++) {
-								if(window[i].z > max)
-									max = window[i].z;
-								else if(window[i].z < min)
-									min = window[i].z;
-								if(window[i].z < max - dist) {
-									//Log.d("PEAK", window[i].z + "");
-									//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
-									//if(angle_z > 0)
-									if((prev_z - angle_z) < 0) {
-										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
-										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
-									}
-									else if(angle_z < 0) {
-									//if((prev_z - angle_z) > 0) {
-										Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
-										turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
-									}
-									max = window[i].z;
-									//max_time = System.currentTimeMillis();
-									prev_z = angle_z;
+//						if(count == 20) {
+//							for(int i=0; i<20; i++) {
+//								if(window[i].z > max)
+//									max = window[i].z;
+//								else if(window[i].z < min)
+//									min = window[i].z;
+//								if(window[i].z < max - dist) {
+//									//Log.d("PEAK", window[i].z + "");
+//									//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
+//									//if(angle_z > 0)
+//									if((prev_z - angle_z) < 0) {
+//										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+//										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+//										
+//										//log the event to the file
+//										if(start_log == true && end_log == true) {
+//											//save to SD
+//											data_save += time_stamp("time") + "\t" + "LEFT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+//											//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+//											//save_ext.writeExt(curr_time , data_save, "gyroscope");
+//											save_ext.writeExt(curr_time , data_save, "Eventlog");
+//											
+//											data_save = "";
+//										}
+//										curr_state = State.LEFT;
+//									}
+//									
+//									else if(angle_z < 0) {
+//									//if((prev_z - angle_z) > 0) {
+//										Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
+//										turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+//										
+//										//log the event to the file
+//										if(start_log == true && end_log == true) {
+//											//save to SD
+//											data_save += time_stamp("time") + "\t" + "RIGHT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+//											//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+//											//save_ext.writeExt(curr_time , data_save, "gyroscope");
+//											save_ext.writeExt(curr_time , data_save, "Eventlog");
+//											
+//											data_save = "";
+//										}
+//										
+//										curr_state = State.RIGHT;
+//									}
+//									max = window[i].z;
+//									//max_time = System.currentTimeMillis();
+//									prev_z = angle_z;
+//									
+////								} else if(window[i].z > min + dist) {
+////									if((prev_z - angle_z) < 0) {
+////										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+////										turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+////									}
+////									min = window[i].z;
+////									prev_z = angle_z;
+//								}
+//								
+//								tv_gyro_turns.setText(turn_string);
+//							}
+//							count = 0;
+//						}						
+    
+						if(z > max)
+							max = z;
+						else if(z < min)
+							min = z;
+						if(z < max - dist) {
+							//Log.d("PEAK", window[i].z + "");
+							//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
+							//if(angle_z > 0)
+							if((prev_z - angle_z) < 0) {
+								Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
+								turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+								
+								//log the event to the file
+								if(start_log == true && end_log == true) {
+									//save to SD
+									data_save += time_stamp("time") + "\t" + "LEFT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+									//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+									//save_ext.writeExt(curr_time , data_save, "gyroscope");
+									save_ext.writeExt(curr_time , data_save, "Eventlog");
 									
+									data_save = "";
+								}
+								curr_state = State.LEFT;
+							}
+							
+							else if(angle_z < 0) {
+							//if((prev_z - angle_z) > 0) {
+								Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
+								turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+								
+								//log the event to the file
+								if(start_log == true && end_log == true) {
+									//save to SD
+									data_save += time_stamp("time") + "\t" + "RIGHT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+									//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
+									//save_ext.writeExt(curr_time , data_save, "gyroscope");
+									save_ext.writeExt(curr_time , data_save, "Eventlog");
+									
+									data_save = "";
+								}
+								
+								curr_state = State.RIGHT;
+							}
+							max = z;
+							//max_time = System.currentTimeMillis();
+							prev_z = angle_z;
+							
 //								} else if(window[i].z > min + dist) {
 //									if((prev_z - angle_z) < 0) {
 //										Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
@@ -410,13 +509,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //									}
 //									min = window[i].z;
 //									prev_z = angle_z;
-								}
-								
-								tv_gyro_turns.setText(turn_string);
-							}
-							count = 0;
-						}						
-    
+						}
+						
+						tv_gyro_turns.setText(turn_string);
+						
 						timestamp = event.timestamp;
 //						float[] deltaRotationMatrix = new float[9];
 //						SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
@@ -427,6 +523,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //						y = (y * deltaRotationMatrix[3]) + (y * deltaRotationMatrix[4]) + (y * deltaRotationMatrix[5]);
 //						z = (z * deltaRotationMatrix[6]) + (z * deltaRotationMatrix[7]) + (z * deltaRotationMatrix[8]);
 
+						
+						
 						//tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n" + "RotAngle : " + angle + "\n\n");
 						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + angle_x + " (rad/s) \ny-axis: " + angle_y + " (rad/s) \nz-axis: " + angle_z + " (rad/s) \n\n");
 						
@@ -523,9 +621,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		        	
 		        	tv_orientation.setText("\nOrientation: \n\nx-axis: " + OrientValues[0] + " (uT) \ny-axis: " + OrientValues[1] + " (uT) \nz-axis: " + OrientValues[2] + " (uT) \n\n");
 		        	
-		        	orient_x.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[0]), true);
-					orient_y.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[1]), true);
-					orient_z.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[2]), true);
+//		        	orient_x.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[0]), true);
+//					orient_y.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[1]), true);
+//					orient_z.appendData(new GraphViewData(System.currentTimeMillis(), OrientValues[2]), true);
 		        }
 				
 				//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
@@ -578,11 +676,13 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //        }
         
         
+        //LinearLayout layout;
+        
         //------------------------------------- INITIALISE GRAPH -------------------------------------//
         
         /**------------------------------------------------------------------------------------------------------**
  		 * 	-------------------------------------| ACCELEROMETER GRAPH|------------------------------------------*
- 		 *//*----------------------------------------------------------------------------------------------------*/		
+ 		 *//*---------------------------------------------------------------------------------------------  -------*/		
         //Accelerometer graph
  		acc_x = new GraphViewSeries("acc_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
  		
@@ -661,88 +761,88 @@ public class DisplaySensor extends Activity implements OnClickListener {
  		layout = (LinearLayout) findViewById(R.id.acc_graph_z);
  		layout.addView(graphView);
  		
- 		
- 		/**------------------------------------------------------------------------------------------------------**
- 		 * 	-------------------------------------| ORIENTATION GRAPH|------------------------------------------*
- 		 *//*----------------------------------------------------------------------------------------------------*/		
-        //Accelerometer graph
- 		orient_x = new GraphViewSeries("orient_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
- 		
- 		/**
- 		 * Graph
- 		 */
- 		// LineGraphView( context, heading)
- 		graphView = new LineGraphView(this, "Orientation Data") {
- 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
- 			@Override
- 			protected String formatLabel(double value, boolean isValueX) {
- 				if (isValueX)
- 					return formatter.format(value); 	// convert unix time to human time
- 				else 
-					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
- 			}
- 		};
-
- 		graphView.addSeries(orient_x); // data
- 		graphView.setScrollable(true);
- 		graphView.setViewPort(1, 80000);
-		//graphView.setScalable(true);
-
- 		layout = (LinearLayout) findViewById(R.id.orient_graph_x);
- 		layout.addView(graphView);
- 		
- 		orient_y = new GraphViewSeries("orient_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
- 		
-		// LineGraphView( context, heading)
-		graphView = new LineGraphView(this, "Orientation Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-
-			@Override
-			protected String formatLabel(double value, boolean isValueX) {
-				if (isValueX)
-					return formatter.format(value); // convert unix time to
-													// human time
-				else
-					return super.formatLabel(value, isValueX); // let the
-																// y-value be
-																// normal-formatted
-			}
-		};
- 		
- 		graphView.addSeries(orient_y); // data
- 		graphView.setScrollable(true);
- 		graphView.setViewPort(1, 80000);
-		//graphView.setScalable(true);
-
- 		layout = (LinearLayout) findViewById(R.id.orient_graph_y);
- 		layout.addView(graphView);
- 		
- 		orient_z = new GraphViewSeries("orient_z", null, new GraphViewData[] {});
- 		
-		// LineGraphView( context, heading)
-		graphView = new LineGraphView(this, "Orientation Data") {
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-
-			@Override
-			protected String formatLabel(double value, boolean isValueX) {
-				if (isValueX)
-					return formatter.format(value); // convert unix time to
-													// human time
-				else
-					return super.formatLabel(value, isValueX); // let the
-																// y-value be
-																// normal-formatted
-			}
-		};
- 		
- 		graphView.addSeries(orient_z); // data
- 		graphView.setScrollable(true);
- 		graphView.setViewPort(1, 80000);
-		//graphView.setScalable(true);
-
- 		layout = (LinearLayout) findViewById(R.id.orient_graph_z);
- 		layout.addView(graphView);
- 		
+// 		
+// 		/**------------------------------------------------------------------------------------------------------**
+// 		 * 	-------------------------------------| ORIENTATION GRAPH|------------------------------------------*
+// 		 *//*----------------------------------------------------------------------------------------------------*/		
+//        //Accelerometer graph
+// 		orient_x = new GraphViewSeries("orient_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3), new GraphViewData[] {});
+// 		
+// 		/**
+// 		 * Graph
+// 		 */
+// 		// LineGraphView( context, heading)
+// 		graphView = new LineGraphView(this, "Orientation Data") {
+// 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+// 			@Override
+// 			protected String formatLabel(double value, boolean isValueX) {
+// 				if (isValueX)
+// 					return formatter.format(value); 	// convert unix time to human time
+// 				else 
+//					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
+// 			}
+// 		};
+//
+// 		graphView.addSeries(orient_x); // data
+// 		graphView.setScrollable(true);
+// 		graphView.setViewPort(1, 80000);
+//		//graphView.setScalable(true);
+//
+// 		layout = (LinearLayout) findViewById(R.id.orient_graph_x);
+// 		layout.addView(graphView);
+// 		
+// 		orient_y = new GraphViewSeries("orient_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3), new GraphViewData[] {});
+// 		
+//		// LineGraphView( context, heading)
+//		graphView = new LineGraphView(this, "Orientation Data") {
+//			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+//
+//			@Override
+//			protected String formatLabel(double value, boolean isValueX) {
+//				if (isValueX)
+//					return formatter.format(value); // convert unix time to
+//													// human time
+//				else
+//					return super.formatLabel(value, isValueX); // let the
+//																// y-value be
+//																// normal-formatted
+//			}
+//		};
+// 		
+// 		graphView.addSeries(orient_y); // data
+// 		graphView.setScrollable(true);
+// 		graphView.setViewPort(1, 80000);
+//		//graphView.setScalable(true);
+//
+// 		layout = (LinearLayout) findViewById(R.id.orient_graph_y);
+// 		layout.addView(graphView);
+// 		
+// 		orient_z = new GraphViewSeries("orient_z", null, new GraphViewData[] {});
+// 		
+//		// LineGraphView( context, heading)
+//		graphView = new LineGraphView(this, "Orientation Data") {
+//			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+//
+//			@Override
+//			protected String formatLabel(double value, boolean isValueX) {
+//				if (isValueX)
+//					return formatter.format(value); // convert unix time to
+//													// human time
+//				else
+//					return super.formatLabel(value, isValueX); // let the
+//																// y-value be
+//																// normal-formatted
+//			}
+//		};
+// 		
+// 		graphView.addSeries(orient_z); // data
+// 		graphView.setScrollable(true);
+// 		graphView.setViewPort(1, 80000);
+//		//graphView.setScalable(true);
+//
+// 		layout = (LinearLayout) findViewById(R.id.orient_graph_z);
+// 		layout.addView(graphView);
+// 		
  		
  		
  		/**------------------------------------------------------------------------------------------------------**
