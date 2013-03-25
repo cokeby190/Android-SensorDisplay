@@ -293,25 +293,28 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									if(aData[0] <= aData_initial[0]+diff || aData[0] == aData_initial[0]) {
 										if(prev_state != State.STOP)
 											curr_state = State.STOP;
-										Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
+										//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
 									}
 								}
 								else if(aData[0] < 0) {
 									if(aData[0] >= aData_initial[0]-diff || aData[0] == aData_initial[0]) {
 										if(prev_state != State.STOP)
 											curr_state = State.STOP;
-										Log.d("data", "current : " + aData[0] + ", thres : " + test2 + ", initial : " + aData_initial[0]);
+										//Log.d("data", "current : " + aData[0] + ", thres : " + test2 + ", initial : " + aData_initial[0]);
 									}
 								}
 								
 								
 								//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
-								Log.d("enter", "entered");
+								//Log.d("enter", "entered");
 							}
 							timestamp2 = event.timestamp;
 							
+//							if(curr_state != null)
+//								Log.d("curr", curr_state.toString());
+							
 							if(curr_state != null)
-								Log.d("curr", curr_state.toString());
+								turn_string += "\nSTOPPPPPP" + ", curr_state : " + curr_state.toString() + "\n";
 						}
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
@@ -530,6 +533,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								}
 								
 								prev_state = curr_state;
+								curr_state = null;
 
 								if (timestamp2 != 0) {
 									curr_state = State.LEFT;
@@ -552,6 +556,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									
 									data_save = "";
 								}
+								
+								prev_state = curr_state;
+								curr_state = null;
+								
 								if (timestamp2 != 0) {
 									curr_state = State.RIGHT;
 								}
@@ -706,9 +714,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					tv_temp.setText("\nTEMPERATURE: \n\n" + "Not available on device" + "\n\n");
 				}
 				
-//				if(curr_state != null)
-//					if(curr_state != prev_state)
-//						Log.d("STATE", curr_state.toString());
+				if(curr_state != null)
+					if(curr_state != prev_state)
+						Log.d("STATE", curr_state.toString());
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
 			}
