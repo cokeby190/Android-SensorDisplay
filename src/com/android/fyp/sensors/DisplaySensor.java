@@ -274,34 +274,45 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							aData = event.values.clone();
 							aData_initial = event.values.clone();
 						}
-																		
-						prev_state = curr_state;
 						
-						if(prev_state != null)
-							Log.d("previous", prev_state.toString());
+						//to check if the previous state is a STOP state, to stop looping
+						if(prev_state == State.STOP && curr_state == null) {
+						}else { 
+							prev_state = curr_state;
+							curr_state = null;
 						
-
-						if (timestamp2 != 0) {
+//						if(prev_state != null)
+//							Log.d("previous", prev_state.toString());
+						
+							float test = aData_initial[0] + diff;
+							float test2 = aData_initial[0] - diff;
+	
+							if (timestamp2 != 0) {
+								
+								if(aData[0] > 0) {
+									if(aData[0] <= aData_initial[0]+diff || aData[0] == aData_initial[0]) {
+										if(prev_state != State.STOP)
+											curr_state = State.STOP;
+										Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
+									}
+								}
+								else if(aData[0] < 0) {
+									if(aData[0] >= aData_initial[0]-diff || aData[0] == aData_initial[0]) {
+										if(prev_state != State.STOP)
+											curr_state = State.STOP;
+										Log.d("data", "current : " + aData[0] + ", thres : " + test2 + ", initial : " + aData_initial[0]);
+									}
+								}
+								
+								
+								//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
+								Log.d("enter", "entered");
+							}
+							timestamp2 = event.timestamp;
 							
-							if(aData[0] > 0) {
-								if(aData[0] <= aData_initial[0]+diff || aData[0] == aData_initial[0]) {
-									if(prev_state != State.STOP)
-										curr_state = State.STOP;
-								}
-							}
-							else if(aData[0] < 0) {
-								if(aData[0] >= aData_initial[0]-diff || aData[0] == aData_initial[0]) {
-									if(prev_state != State.STOP)
-										curr_state = State.STOP;
-								}
-							}
-							Log.d("data", "current : " + aData[0] + ", thres : " + aData_initial[0]+diff);
-							Log.d("enter", "entered");
+							if(curr_state != null)
+								Log.d("curr", curr_state.toString());
 						}
-						timestamp2 = event.timestamp;
-						
-						if(curr_state != null)
-							Log.d("curr", curr_state.toString());
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
@@ -695,9 +706,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					tv_temp.setText("\nTEMPERATURE: \n\n" + "Not available on device" + "\n\n");
 				}
 				
-				if(curr_state != null)
-					if(curr_state != prev_state)
-						Log.d("STATE", curr_state.toString());
+//				if(curr_state != null)
+//					if(curr_state != prev_state)
+//						Log.d("STATE", curr_state.toString());
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
 			}
