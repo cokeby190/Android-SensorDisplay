@@ -125,9 +125,11 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private GraphViewSeries mag_x, mag_y, mag_z;
 	private GraphViewSeries orient_x, orient_y, orient_z;
+	private GraphViewSeries gps_graph;
 	
 	//State Transition
 	State prev_state, curr_state;	
+	State previous, current;
 
 	double max = -10000000;
 	double min = 10000000;
@@ -282,7 +284,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						}else { 
 							prev_state = curr_state;
 							curr_state = null;
-						
+							previous = current;
+							
 //						if(prev_state != null)
 //							Log.d("previous", prev_state.toString());
 						
@@ -322,9 +325,14 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							
 							diff_time = event.timestamp - start_stop;
 							//diff_time >= ___ milliseconds (threshold for stop)
-							if(prev_state == State.STOP && curr_state == null && (start_stop != 0 && diff_time >= 300000000))
+							if(prev_state == State.STOP && curr_state == null && (start_stop != 0 && diff_time >= 300000000)) {
 								turn_string += "\nSTOPPPPPP" + ", curr_state : " + prev_state.toString() + "\n";
+								current = State.STOP;
+							}
 						}
+						
+						if(curr_state != null)
+							Log.d("curr", curr_state.toString());
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
@@ -540,6 +548,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									
 									data_save = "";
 								}
+	
+								prev_state = curr_state;
+								curr_state = null;
+								previous = current;
 
 								if (timestamp2 != 0) {
 									if(prev_state != State.LEFT)
@@ -566,6 +578,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								
 								prev_state = curr_state;
 								curr_state = null;
+								previous = current;
 								
 								if (timestamp2 != 0) {
 									if(prev_state != State.RIGHT)
@@ -573,8 +586,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								}
 								timestamp = event.timestamp;
 							}
-							if(curr_state == State.LEFT || curr_state == State.RIGHT)
+							if(curr_state == State.LEFT || curr_state == State.RIGHT) {
 								turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+								current = curr_state;
+							}
 							max = z;
 							//max_time = System.currentTimeMillis();
 							prev_z = angle_z;
@@ -599,8 +614,6 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //						x = (x * deltaRotationMatrix[0]) + (x * deltaRotationMatrix[1]) + (x * deltaRotationMatrix[2]);
 //						y = (y * deltaRotationMatrix[3]) + (y * deltaRotationMatrix[4]) + (y * deltaRotationMatrix[5]);
 //						z = (z * deltaRotationMatrix[6]) + (z * deltaRotationMatrix[7]) + (z * deltaRotationMatrix[8]);
-
-						
 						
 						//tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + x + " (rad/s) \ny-axis: " + y + " (rad/s) \nz-axis: " + z + " (rad/s) \n\n" + "RotAngle : " + angle + "\n\n");
 						tv_gyro.setText("\nGYROSCOPE: \n\nx-axis: " + angle_x + " (rad/s) \ny-axis: " + angle_y + " (rad/s) \nz-axis: " + angle_z + " (rad/s) \n\n");
@@ -724,9 +737,14 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					tv_temp.setText("\nTEMPERATURE: \n\n" + "Not available on device" + "\n\n");
 				}
 				
-				if(curr_state != null)
+				if(curr_state != null) {
 					if(curr_state != prev_state)
 						Log.d("STATE", curr_state.toString());
+				}
+				
+//				if(current != null)
+//					if(current != previous)
+//						Log.d("STATE", current.toString());
 			
 			//------------------------------------- UNSUPPORTED SENSORS -------------------------------------//
 			}
@@ -925,6 +943,31 @@ public class DisplaySensor extends Activity implements OnClickListener {
 // 		layout.addView(graphView);
 // 		
  		
+ 		/**------------------------------------------------------------------------------------------------------**
+ 		 * 	---------------------------------------| GPS GRAPH |-------------------------------------------*
+ 		 *//*----------------------------------------------------------------------------------------------------*/																										 	
+ 		//Gyroscope graph
+ 		gps_graph = new GraphViewSeries("gps_graph", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
+ 		
+ 		// LineGraphView( context, heading)
+ 		graphView = new LineGraphView(this, "GPS Data") {
+ 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+ 			@Override
+ 			protected String formatLabel(double value, boolean isValueX) {
+ 				if (isValueX)
+ 					return formatter.format(value); 	// convert unix time to human time
+ 				else 
+					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
+ 			}
+ 		};
+
+ 		graphView.addSeries(gps_graph); // data
+ 		graphView.setScrollable(true);
+ 		graphView.setViewPort(1, 80000);
+		//graphView.setScalable(true);
+
+ 		layout = (LinearLayout) findViewById(R.id.gps_graph);
+ 		layout.addView(graphView);
  		
  		/**------------------------------------------------------------------------------------------------------**
  		 * 	---------------------------------------| GYROSCOPE GRAPH |-------------------------------------------*
@@ -1146,6 +1189,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	
 				data_save = "";
 			}
+			
+			gps_graph.appendData(new GraphViewData(System.currentTimeMillis(), location.getSpeed()*3.6), true);
+			Log.d("SPEED", location.getSpeed()*3.6 + "");
 
 			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
 		}

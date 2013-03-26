@@ -3,7 +3,6 @@ package com.android.fyp.sensors;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.text.Spanned;
 
 public class DialogAct_nonSpanned {
 
