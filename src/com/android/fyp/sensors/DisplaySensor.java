@@ -81,7 +81,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private int count = 0;
 	private float diff = (float) 0.09;
 	private float[] aData_initial = new float[3];
-	private float timestamp2;
+	private long timestamp2;
 	
 	//Gyropscope
 	// Create a constant to convert nanoseconds to seconds.
@@ -136,6 +136,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	long max_time = 0;
 	double max_ignore = 0.05;
 	double min_ignore = -0.05;
+	
+	private long start_stop;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -286,24 +288,29 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						
 							float test = aData_initial[0] + diff;
 							float test2 = aData_initial[0] - diff;
+							long diff_time;
 	
 							if (timestamp2 != 0) {
-								
+	
 								if(aData[0] > 0) {
 									if(aData[0] <= aData_initial[0]+diff || aData[0] == aData_initial[0]) {
-										if(prev_state != State.STOP)
+										if(prev_state != State.STOP) {
 											curr_state = State.STOP;
+											start_stop = timestamp2;
+										}
 										//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
 									}
 								}
 								else if(aData[0] < 0) {
 									if(aData[0] >= aData_initial[0]-diff || aData[0] == aData_initial[0]) {
-										if(prev_state != State.STOP)
+										if(prev_state != State.STOP) {
 											curr_state = State.STOP;
+											start_stop = timestamp2;
+										}
 										//Log.d("data", "current : " + aData[0] + ", thres : " + test2 + ", initial : " + aData_initial[0]);
 									}
 								}
-								
+
 								
 								//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
 								//Log.d("enter", "entered");
@@ -313,8 +320,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //							if(curr_state != null)
 //								Log.d("curr", curr_state.toString());
 							
-							if(curr_state != null)
-								turn_string += "\nSTOPPPPPP" + ", curr_state : " + curr_state.toString() + "\n";
+							diff_time = event.timestamp - start_stop;
+							//diff_time >= ___ milliseconds (threshold for stop)
+							if(prev_state == State.STOP && curr_state == null && (start_stop != 0 && diff_time >= 300000000))
+								turn_string += "\nSTOPPPPPP" + ", curr_state : " + prev_state.toString() + "\n";
 						}
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
@@ -519,7 +528,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							//if(angle_z > 0)
 							if((prev_z - angle_z) < 0) {
 								Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
-								turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+//								/turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
 								//log the event to the file
 								if(start_log == true && end_log == true) {
@@ -531,12 +540,10 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									
 									data_save = "";
 								}
-								
-								prev_state = curr_state;
-								curr_state = null;
 
 								if (timestamp2 != 0) {
-									curr_state = State.LEFT;
+									if(prev_state != State.LEFT)
+										curr_state = State.LEFT;
 								}
 								timestamp = event.timestamp;
 							}
@@ -544,7 +551,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							else if(angle_z < 0) {
 							//if((prev_z - angle_z) > 0) {
 								Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
-								turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+								//turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
 								//log the event to the file
 								if(start_log == true && end_log == true) {
@@ -561,10 +568,13 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								curr_state = null;
 								
 								if (timestamp2 != 0) {
-									curr_state = State.RIGHT;
+									if(prev_state != State.RIGHT)
+										curr_state = State.RIGHT;
 								}
 								timestamp = event.timestamp;
 							}
+							if(curr_state == State.LEFT || curr_state == State.RIGHT)
+								turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 							max = z;
 							//max_time = System.currentTimeMillis();
 							prev_z = angle_z;
@@ -667,9 +677,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					
 					float b = (float) 0.98;
 					
-					OrientValues[0] = b * (OrientValues[0] + gData[0]*dT) + (1 - b) *(aData[0]);
-					OrientValues[1] = b * (OrientValues[1] + gData[1]*dT) + (1 - b) *(aData[1]);
-					OrientValues[2] = b * (OrientValues[2] + gData[2]*dT) + (1 - b) *(aData[2]);
+					OrientValues[0] = (float) (b * (OrientValues[0] + gData[0]*dT) + (1 - b) *(aData[0]));
+					OrientValues[1] = (float) (b * (OrientValues[1] + gData[1]*dT) + (1 - b) *(aData[1]));
+					OrientValues[2] = (float) (b * (OrientValues[2] + gData[2]*dT) + (1 - b) *(aData[2]));
 					
 					
 		        	//SensorManager.getRotationMatrix(Rmat, Imat, aData, mData);
