@@ -81,7 +81,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private int count = 0;
 	private float diff = (float) 0.09;
 	private float[] aData_initial = new float[3];
-	private long timestamp2;
+	private long timestamp2, timestamp3;
+	private float diff_acc = (float) 1.0;
 	
 	//Gyropscope
 	// Create a constant to convert nanoseconds to seconds.
@@ -251,6 +252,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 				switch(event.sensor.getType()) {
 					case Sensor.TYPE_ACCELEROMETER:
 						
+						double acceleration;
+						
 						if(cal_acc != null) {
 							x = event.values[0] - cal_acc[0];
 							y = event.values[1] - cal_acc[1];
@@ -313,6 +316,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 										//Log.d("data", "current : " + aData[0] + ", thres : " + test2 + ", initial : " + aData_initial[0]);
 									}
 								}
+								// 	TODO: ADD WHEN aData[0] == 0!!! 
 
 								
 								//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
@@ -332,7 +336,25 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						}
 						
 						if(curr_state != null)
-							Log.d("curr", curr_state.toString());
+							Log.d("curr", curr_state.toString());	
+						
+						acceleration = Math.sqrt(x*x + y*y + z*z);
+						//Log.d("ACCELERATION", acceleration + " m/s2");
+						
+//						prev_state = curr_state;
+//						curr_state = null;
+
+						if (timestamp3 != 0) {
+							if(acceleration >= diff_acc) {
+								curr_state = State.ACC;
+								turn_string += "\nACCELERATION" + ", acc : " + acceleration + "\n";
+							}
+							else if(acceleration <= (diff_acc*-1)) {
+								curr_state = State.DEC;
+								turn_string += "\nDECELERATION" + ", acc : " + acceleration + "\n";
+							}
+						}
+						timestamp3 = event.timestamp;
 						
 						tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + x + " (m/s^2) \ny-axis: " + y + " (m/s^2) \nz-axis: " + z + " (m/s^2) \n\n");
 						
@@ -557,7 +579,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									if(prev_state != State.LEFT)
 										curr_state = State.LEFT;
 								}
-								timestamp = event.timestamp;
+								timestamp2 = event.timestamp;
 							}
 							
 							else if(angle_z < 0) {
