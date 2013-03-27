@@ -584,8 +584,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								timestamp2 = event.timestamp;
 							}
 							
-							else if(angle_z < 0) {
-							//if((prev_z - angle_z) > 0) {
+							//else if(angle_z < 0) {
+							if((prev_z - angle_z) > 0) {
 								Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
 								//turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
