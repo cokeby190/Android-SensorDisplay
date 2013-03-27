@@ -83,7 +83,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private float[] aData_initial = new float[3];
 	private long timestamp2, timestamp3;
 	//threshold for forward, backward acceleration (acc_x)
-	private float diff_acc = (float) 0.8;
+	private float diff_acc = (float) 1.0;
 	
 	//Gyropscope
 	// Create a constant to convert nanoseconds to seconds.
@@ -566,7 +566,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							//Log.d("PEAK", window[i].z + "");
 							//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
 							//if(angle_z > 0)
-							if((prev_z - angle_z) < 0) {
+							if((angle_z - prev_z) > 3.0) {
 								Log.d("TURN", "LEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z));
 //								/turn_string += "\nLEFT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
@@ -593,7 +593,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							}
 							
 							//else if(angle_z < 0) {
-							else if((prev_z - angle_z) > 0) {
+							else if((angle_z - prev_z) < -3.0) {
 								Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
 								//turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
