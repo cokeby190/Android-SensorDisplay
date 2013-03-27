@@ -395,19 +395,19 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //						
 //						double RotAngle = 0.00;
 						
-						prev_x = angle_x;
-						prev_y = angle_y;
-						prev_z = angle_z;
-						
-						// This timestep's delta rotation to be multiplied by the current rotation
-						// after computing it from the gyro sample data.
-						if (timestamp != 0) {
-							
-							dT = (event.timestamp - timestamp) * NS2S;
-							
-							angle_x += (x*dT) * rad2deg;
-							angle_y += (y*dT) * rad2deg;
-							angle_z += (z*dT) * rad2deg;
+//						prev_x = angle_x;
+//						prev_y = angle_y;
+//						prev_z = angle_z;
+//						
+//						// This timestep's delta rotation to be multiplied by the current rotation
+//						// after computing it from the gyro sample data.
+//						if (timestamp != 0) {
+//							
+//							dT = (event.timestamp - timestamp) * NS2S;
+//							
+//							angle_x += (x*dT) * rad2deg;
+//							angle_y += (y*dT) * rad2deg;
+//							angle_z += (z*dT) * rad2deg;
 							
 //							change_x = prev_x - angle_x;
 //							change_y = prev_y - angle_y;
@@ -472,7 +472,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							// " axisY: " + axisY + //
 							// " axisZ: " + axisZ + //
 							// " RotAngle: " + RotAngle);
-						}
+//						}
 						
 //						if(count < 20)
 //							window[count] = new gyro_data(x,y,z);
@@ -555,6 +555,9 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						else if(z < min)
 							min = z;
 						if(z < max - dist) {
+
+							integrateGyro(event.timestamp, "z", z);
+							Log.d("Z", "angle : " + angle_z);
 							//Log.d("PEAK", window[i].z + "");
 							//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
 							//if(angle_z > 0)
@@ -585,7 +588,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							}
 							
 							//else if(angle_z < 0) {
-							if((prev_z - angle_z) > 0) {
+							else if((prev_z - angle_z) > 0) {
 								Log.d("TURN", "RIGHT TURN" + ", curr_angle : " + angle_z + ", change : " + (prev_z - angle_z));
 								//turn_string += "\nRIGHT TURN" + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
 								
@@ -1174,6 +1177,38 @@ public class DisplaySensor extends Activity implements OnClickListener {
 // 		
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
+    
+    private double integrateGyro(long event_timestamp, String axes, float value) {
+    	
+    	float timestamp = 0;
+    	
+    	if(axes.equals("x"))
+    		prev_x = angle_x;
+    	if(axes.equals("y"))
+    		prev_y = angle_y;
+    	if(axes.equals("z"))
+    		prev_z = angle_z;
+		
+		// This timestep's delta rotation to be multiplied by the current rotation
+		// after computing it from the gyro sample data.
+		do {
+			
+			dT = (event_timestamp - timestamp) * NS2S;
+			
+			if(axes.equals("x"))
+				angle_x += (value*dT) * rad2deg;
+			if(axes.equals("y"))
+				angle_y += (value*dT) * rad2deg;
+			if(axes.equals("z"))
+				angle_z += (value*dT) * rad2deg;
+			
+			Log.d("integrate", "angle : " + angle_z);
+		} while(timestamp != 0);
+		
+		timestamp = event_timestamp;
+		
+		return angle_z;
+    }
     
     private void getData() {
     	
