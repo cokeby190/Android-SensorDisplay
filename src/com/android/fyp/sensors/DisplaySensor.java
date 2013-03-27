@@ -61,7 +61,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	//UI Elements
 	private TextView sensor_no;
 	private TextView tv_acc, tv_gyro, tv_magnet, tv_light, tv_prox, tv_temp, tv_orientation,
-		tv_gyro_turns;
+		tv_gyro_turns, tv_gps;
 	private Button b_start_log, b_end_log;
 	private boolean start_log = false;
 	private boolean end_log = false;
@@ -82,7 +82,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 	private float diff = (float) 0.09;
 	private float[] aData_initial = new float[3];
 	private long timestamp2, timestamp3;
-	private float diff_acc = (float) 1.0;
+	//threshold for forward, backward acceleration (acc_x)
+	private float diff_acc = (float) 0.8;
 	
 	//Gyropscope
 	// Create a constant to convert nanoseconds to seconds.
@@ -338,7 +339,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						if(curr_state != null)
 							Log.d("curr", curr_state.toString());	
 						
-						acceleration = Math.sqrt(x*x + y*y + z*z);
+						acceleration = aData[0];
+						//acceleration = Math.sqrt(x*x + y*y + z*z);
 						//Log.d("ACCELERATION", acceleration + " m/s2");
 						
 //						prev_state = curr_state;
@@ -346,12 +348,12 @@ public class DisplaySensor extends Activity implements OnClickListener {
 
 						if (timestamp3 != 0) {
 							if(acceleration >= diff_acc) {
-								curr_state = State.ACC;
-								turn_string += "\nACCELERATION" + ", acc : " + acceleration + "\n";
-							}
-							else if(acceleration <= (diff_acc*-1)) {
 								curr_state = State.DEC;
 								turn_string += "\nDECELERATION" + ", acc : " + acceleration + "\n";
+							}
+							else if(acceleration <= (diff_acc*-1)) {
+								curr_state = State.ACC;
+								turn_string += "\nACCELERATION" + ", acc : " + acceleration + "\n";
 							}
 						}
 						timestamp3 = event.timestamp;
@@ -609,7 +611,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								timestamp = event.timestamp;
 							}
 							if(curr_state == State.LEFT || curr_state == State.RIGHT) {
-								turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n";
+								turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
+										+ ", prev : " + prev_z;
 								current = curr_state;
 							}
 							max = z;
@@ -1212,10 +1215,12 @@ public class DisplaySensor extends Activity implements OnClickListener {
 				data_save = "";
 			}
 			
+			tv_gps.setText("\nGPS Speed: " + location.getSpeed() + "\n\n");
 			gps_graph.appendData(new GraphViewData(System.currentTimeMillis(), location.getSpeed()*3.6), true);
 			Log.d("SPEED", location.getSpeed()*3.6 + "");
 
-			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "LOCATION INFORMATION : " + location.getLatitude() + ", " + location.getLongitude() 
+					+ ", SPEED : " + location.getSpeed(), Toast.LENGTH_SHORT).show();
 		}
 
 		public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -1247,6 +1252,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
     	
     	tv_orientation = (TextView) findViewById(R.id.orientation_text);
     	tv_gyro_turns = (TextView) findViewById(R.id.gyroscope_turns);
+    	tv_gps = (TextView) findViewById(R.id.gps_text);
     	
     	b_acc = (Button) findViewById(R.id.accelerometer_button);
     	b_gyro = (Button) findViewById(R.id.gyroscope_button);
