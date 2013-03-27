@@ -548,7 +548,12 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //								tv_gyro_turns.setText(turn_string);
 //							}
 //							count = 0;
-//						}						
+//						}		
+						
+						if(timestamp != 0) {
+							dT = (event.timestamp - timestamp) * NS2S;							
+						} 
+						timestamp = event.timestamp;
     
 						if(z > max)
 							max = z;
@@ -556,7 +561,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							min = z;
 						if(z < max - dist) {
 
-							integrateGyro(event.timestamp, "z", z);
+							integrateGyro(event.timestamp, timestamp,"z", z, dT);
 							Log.d("Z", "angle : " + angle_z);
 							//Log.d("PEAK", window[i].z + "");
 							//Toast.makeText(getApplicationContext(), "PEAK", Toast.LENGTH_SHORT).show();
@@ -1178,9 +1183,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
  		//------------------------------------- INITIALISE GRAPH -------------------------------------//
 	}
     
-    private double integrateGyro(long event_timestamp, String axes, float value) {
-    	
-    	float timestamp = 0;
+    private void integrateGyro(long event_timestamp, float timestamp, String axes, float value, float dT) {
     	
     	if(axes.equals("x"))
     		prev_x = angle_x;
@@ -1191,23 +1194,14 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		
 		// This timestep's delta rotation to be multiplied by the current rotation
 		// after computing it from the gyro sample data.
-		do {
-			
-			dT = (event_timestamp - timestamp) * NS2S;
-			
-			if(axes.equals("x"))
-				angle_x += (value*dT) * rad2deg;
-			if(axes.equals("y"))
-				angle_y += (value*dT) * rad2deg;
-			if(axes.equals("z"))
-				angle_z += (value*dT) * rad2deg;
-			
-			Log.d("integrate", "angle : " + angle_z);
-		} while(timestamp != 0);
+		if(axes.equals("x"))
+			angle_x += (value*dT) * rad2deg;
+		if(axes.equals("y"))
+			angle_y += (value*dT) * rad2deg;
+		if(axes.equals("z"))
+			angle_z += (value*dT) * rad2deg;
 		
-		timestamp = event_timestamp;
-		
-		return angle_z;
+		Log.d("integrate", "angle : " + angle_z);
     }
     
     private void getData() {
