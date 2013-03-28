@@ -46,20 +46,25 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:id="@+id/b_start_left"
+                android:id="@+id/b_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/blue_button"
-                android:text="Start LEFT" />
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="LEFT" />
 
             <Button
-                android:id="@+id/b_end_left"
+                android:id="@+id/b_right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/blue_button"
-                android:text="End LEFT" />
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="RIGHT" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -67,21 +72,76 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:id="@+id/b_start_right"
+                android:id="@+id/b_straight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/green_button"
-                android:text="Start RIGHT" />
+                android:background="@drawable/blue_button"
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="STRAIGHT" />
 
             <Button
-                android:id="@+id/b_end_right"
+                android:id="@+id/b_constant"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/green_button"
-                android:text="End RIGHT" />
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="CONSTANT" />
+
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/b_accel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/green_button"
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="ACC" />
+
+            <Button
+                android:id="@+id/b_decel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/green_button"
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="DEC" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/b_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/red_button"
+                android:minHeight="88dp"
+                android:minWidth="88dp"
+                android:text="STOP" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="EVENT"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="120sp" />
 
         <TextView
             android:id="@+id/sensor_list"
