@@ -218,7 +218,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 			else if (GPSenabled && !NETenabled) {
 				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 			Toast.makeText(getApplicationContext(), "GPS yes NET no", Toast.LENGTH_LONG).show();
-		}
+			}
 			else {
 				Criteria criteria = new Criteria();
 				criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -456,7 +456,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 									
 									tv_event.setText("ACCEL");
 									
-									//log the event to the file
+									//log the event to th2e file
 									if(start_log == true && end_log == true) {
 										//save to SD
 										data_save += time_stamp("time") + "\t" + "ACCELERATE" + "\n";

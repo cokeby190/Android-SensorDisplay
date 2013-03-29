@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView	xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical" >
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <Button
+	            android:id="@+id/b_start_log"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/red_button"
+	            android:text="Start Log" />
+	
+	        <Button
+	            android:id="@+id/b_end_log"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/red_button"
+	            android:text="End Log" />
+	
+	    </LinearLayout>
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <Button
+	            android:id="@+id/b_left"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/blue_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="LEFT" />
+	
+	        <Button
+	            android:id="@+id/b_right"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/blue_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="RIGHT" />
+	    </LinearLayout>
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <Button
+	            android:id="@+id/b_accel"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/green_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="ACC" />
+	
+	        <Button
+	            android:id="@+id/b_decel"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/green_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="DEC" />
+	    </LinearLayout>
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <Button
+	            android:id="@+id/b_constant"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/green_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="CONSTANT" />
+	    </LinearLayout>
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <Button
+	            android:id="@+id/b_stop"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_margin="10dp"
+	            android:background="@drawable/red_button"
+	            android:minHeight="88dp"
+	            android:minWidth="88dp"
+	            android:text="STOP" />
+	    </LinearLayout>
+	
+	    <TextView
+	        android:id="@+id/tv_event"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_margin="30dp"
+	        android:text="EVENT"
+	        android:textAppearance="?android:attr/textAppearanceLarge"
+	        android:textSize="120sp" />
+	
+	</LinearLayout>
+</ScrollView>

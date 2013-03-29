@@ -30,7 +30,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private boolean acc = false, gyro = false;
 	
 	//UI Elements
-	private Button b_caliberate;
+	private Button b_caliberate, b_caliberate2;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         
         b_caliberate = (Button) findViewById(R.id.b_caliberate);
         b_caliberate.setOnClickListener(this);
+        b_caliberate2 = (Button) findViewById(R.id.b_caliberate2);
+        b_caliberate2.setOnClickListener(this);
         
         //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
@@ -61,13 +63,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				switch(event.sensor.getType()) {
 					case Sensor.TYPE_ACCELEROMETER:
 						aData = event.values.clone();
-						//Log.d("Accelerometer", "x : " + event.values[0] + " , y : " + event.values[1] + " , z : " + event.values[2]);
 						if(event.values[0] != 0.0 && event.values[1] != 0.0 && event.values[2] != 0.0)
 							acc = true;
 						break;
 					case Sensor.TYPE_GYROSCOPE:
 						gData = event.values.clone();
-						//Log.d("Gyroscope", "x : " + event.values[0] + " , y : " + event.values[1] + " , z : " + event.values[2]);
 						if(event.values[0] != 0.0 && event.values[1] != 0.0 && event.values[2] != 0.0)
 							gyro = true;
 						break;
@@ -114,10 +114,21 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					send_data.putFloatArray("Gyro", gData);
 				cal_data.putExtras(send_data);
 				startActivity(cal_data);
-				
-				Log.d("TEST", "test");
 				break;
-		
+
+			case R.id.b_caliberate2:
+				
+				Intent cal_data2 = new Intent(this, SensorDetection.class);
+				Bundle send_data2 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data2.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data2.putFloatArray("Gyro", gData);
+				cal_data2.putExtras(send_data2);
+				startActivity(cal_data2);
+				break;
 		}
 	}
 }
