@@ -1574,7 +1574,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "LEFT" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time , data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1588,7 +1588,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "RIGHT" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time , data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1602,7 +1602,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "STRAIGHT" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time, data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1616,7 +1616,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "ACCELERATION" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time, data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1630,7 +1630,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "DECELERATION" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time, data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1644,7 +1644,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "CONSTANT" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time, data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
@@ -1658,7 +1658,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 					data_log += time_stamp("time") + "\t" + "STOP" + "\n";
 					//save timestamp on start log
 					log_time = sdf_grdtruth.format(new Date());
-					save_ext.writeExt(log_time , data_log, "GroundTruth");
+					save_ext.writeExt(curr_time, data_log, "GroundTruth");
 					data_log = "";
 				}
 				else {
