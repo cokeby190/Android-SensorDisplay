@@ -281,8 +281,11 @@ public class DisplaySensor extends Activity implements OnClickListener {
 							aData_initial = event.values.clone();
 						}
 						
+						acceleration = aData[0];
+						
 						//to check if the previous state is a STOP state, to stop looping
-						if(prev_state == State.STOP && curr_state == null) {
+						if((prev_state == State.STOP && curr_state == null) || (prev_state == State.ACC && curr_state == null) || 
+								(prev_state == State.DEC && curr_state == null)) {
 						}else { 
 							prev_state = curr_state;
 							curr_state = null;
@@ -320,6 +323,49 @@ public class DisplaySensor extends Activity implements OnClickListener {
 								
 								//Log.d("data", "current : " + aData[0] + ", thres : " + test + ", initial : " + aData_initial[0]);
 								//Log.d("enter", "entered");
+								
+//								if(acceleration >= diff_acc) {
+//									if(prev_state != State.DEC) {
+//										curr_state = State.DEC;
+//										if(prev_state != null)
+//											turn_string += "\nprev : " + prev_state.toString();
+//										else
+//											turn_string += "\nprev : " + "null";
+//										turn_string += "\nDECELERATION" + ", acc : " + acceleration + "\n";
+//										
+//										tv_event.setText("DECEL");
+//										
+//										//log the event to the file
+//										if(start_log == true && end_log == true) {
+//											//save to SD
+//											data_save += time_stamp("time") + "\t" + "DECELERATE" + "\n";
+//											save_ext.writeExt(curr_time , data_save, "Eventlog");
+//											
+//											data_save = "";
+//										}
+//									}
+//								}
+//								else if(acceleration <= (diff_acc*-1)) {
+//									if(prev_state != State.ACC) {
+//										curr_state = State.ACC;
+//										if(prev_state != null)
+//											turn_string += "\nprev : " + prev_state.toString();
+//										else
+//											turn_string += "\nprev : " + "null";
+//										turn_string += "\nACCELERATION" + ", acc : " + acceleration + "\n";
+//										
+//										tv_event.setText("ACCEL");
+//										
+//										//log the event to the file
+//										if(start_log == true && end_log == true) {
+//											//save to SD
+//											data_save += time_stamp("time") + "\t" + "ACCELERATE" + "\n";
+//											save_ext.writeExt(curr_time , data_save, "Eventlog");
+//											
+//											data_save = "";
+//										}
+//									}
+//								}
 							}
 							timestamp2 = event.timestamp;
 							
@@ -368,13 +414,15 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						if(curr_state != null)
 							Log.d("curr", curr_state.toString());	
 						
-						acceleration = aData[0];
-						//acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
-						//Log.d("ACCELERATION", acceleration + " m/s2");
-						
-//						prev_state = curr_state;
-//						curr_state = null;
-
+//						acceleration = aData[0];
+//						//acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
+//						//Log.d("ACCELERATION", acceleration + " m/s2");
+//						
+//						if(curr_state != null) {
+//							prev_state = curr_state;
+//							curr_state = null;
+//						}
+//
 						if (timestamp3 != 0) {
 							if(acceleration >= diff_acc) {
 								if(prev_state != State.DEC) {
@@ -644,36 +692,37 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //									data_save = "";
 //								}
 	
-								prev_state = curr_state;
-								curr_state = null;
-								previous = current;
-
-								if (timestamp2 != 0) {
-									if(prev_state != State.LEFT) {
-										curr_state = State.LEFT;
-										if(prev_state != null)
-											 turn_string += "\nprev state : " + prev_state.toString();
-										else
-											turn_string += "\nprev state : " + "null";
-										
-										turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
-													+ ", prev : " + prev_z;
-										
-										tv_event.setText("LEFT");
-										
-										//log the event to the file
-										if(start_log == true && end_log == true) {
-											//save to SD
-											data_save += time_stamp("time") + "\t" + "LEFT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
-											//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
-											//save_ext.writeExt(curr_time , data_save, "gyroscope");
-											save_ext.writeExt(curr_time , data_save, "Eventlog");
+								//to check if the previous state is a STOP state, to stop looping
+								if(prev_state == State.LEFT && curr_state == null) {
+								}else { 
+									prev_state = curr_state;
+									curr_state = null;
+	
+									if (timestamp2 != 0) {
+										if(prev_state != State.LEFT) {
+											curr_state = State.LEFT;
+											if(prev_state != null)
+												 turn_string += "\nprev state : " + prev_state.toString();
+											else
+												turn_string += "\nprev state : " + "null";
 											
-											data_save = "";
-										}
-									}	
+											turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
+														+ ", prev : " + prev_z;
+											
+											tv_event.setText("LEFT");
+											
+											//log the event to the file
+											if(start_log == true && end_log == true) {
+												//save to SD
+												data_save += time_stamp("time") + "\t" + "LEFT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+												save_ext.writeExt(curr_time , data_save, "Eventlog");
+												
+												data_save = "";
+											}
+										}	
+									}
+									timestamp2 = event.timestamp;
 								}
-								timestamp2 = event.timestamp;
 							}
 							
 							//else if(angle_z < 0) {
@@ -692,35 +741,36 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //									data_save = "";
 //								}
 								
-								prev_state = curr_state;
-								curr_state = null;
-								previous = current;
-								
-								if (timestamp2 != 0) {
-									if(prev_state != State.RIGHT) {
-										curr_state = State.RIGHT;
-										if(prev_state != null)
-											 turn_string += "\nprev state : " + prev_state.toString();
-										else
-											turn_string += "\nprev state : " + "null";
-										turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
-												+ ", prev : " + prev_z;
-										
-										tv_event.setText("RIGHT");
-										
-										//log the event to the file
-										if(start_log == true && end_log == true) {
-											//save to SD
-											data_save += time_stamp("time") + "\t" + "RIGHT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
-											//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
-											//save_ext.writeExt(curr_time , data_save, "gyroscope");
-											save_ext.writeExt(curr_time , data_save, "Eventlog");
+								//to check if the previous state is a STOP state, to stop looping
+								if(prev_state == State.RIGHT && curr_state == null) {
+								}else { 
+									prev_state = curr_state;
+									curr_state = null;
+									
+									if (timestamp2 != 0) {
+										if(prev_state != State.RIGHT) {
+											curr_state = State.RIGHT;
+											if(prev_state != null)
+												 turn_string += "\nprev state : " + prev_state.toString();
+											else
+												turn_string += "\nprev state : " + "null";
+											turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
+													+ ", prev : " + prev_z;
 											
-											data_save = "";
+											tv_event.setText("RIGHT");
+											
+											//log the event to the file
+											if(start_log == true && end_log == true) {
+												//save to SD
+												data_save += time_stamp("time") + "\t" + "RIGHT TURN" + "\t" + "curr_angle : " + angle_z  + "\t" +  "change : " + (prev_z - angle_z) + "\n";
+												save_ext.writeExt(curr_time , data_save, "Eventlog");
+												
+												data_save = "";
+											}
 										}
 									}
+									timestamp = event.timestamp;
 								}
-								timestamp = event.timestamp;
 							}
 //							if(curr_state == State.LEFT || curr_state == State.RIGHT) {
 //								turn_string += "\nTURNNNN" + ", curr_state : " + curr_state.toString() + ", curr_angle : " + angle_z  + ", change : " + (prev_z - angle_z) + "\n" 
@@ -757,10 +807,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						
 						if(start_log == true && end_log == true) {
 							//save to SD
-							//data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\t" + "angle," + angle + "\n";
 							data_save += time_stamp("time") + "\t" + "Gyroscope" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-							//save_ext.writeExt(time_stamp("date") , data_save, "gyroscope");
-							//save_ext.writeExt(curr_time , data_save, "gyroscope");
 							save_ext.writeExt(curr_time , data_save, "gyro");
 							
 							data_save = "";
@@ -794,8 +841,6 @@ public class DisplaySensor extends Activity implements OnClickListener {
 						if(start_log == true && end_log == true) {
 							//save to SD
 							data_save += time_stamp("time") + "\t" + "Magnetometer" + "\t" + "x," + x + "\t" + "y," + y + "\t" + "z," + z + "\n";
-							//save_ext.writeExt(time_stamp("date") , data_save, "magnetometer");
-							//save_ext.writeExt(curr_time , data_save, "magnetometer");
 							save_ext.writeExt(curr_time , data_save, "magnet");
 							
 							data_save = "";
