@@ -179,8 +179,8 @@ public class DisplaySensor extends Activity implements OnClickListener {
 //        
         //Register Sensor Listener for all the sensors in the device. 
         for (Sensor sensor : deviceSensors) {
-			//mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        	mSensorManager.registerListener(mSensorListener, sensor, 40000);
+			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        	//mSensorManager.registerListener(mSensorListener, sensor, 40000);
 		}
 		
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());
@@ -1483,7 +1483,7 @@ public class DisplaySensor extends Activity implements OnClickListener {
 		//register listener again onResume
 		for (Sensor sensor : deviceSensors) {
 			
-			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(mSensorListener, sensor, SensorManager.SENSOR_DELAY_GAME);
 		}
 		
 		sensor_no.setText("\n\nNumber of sensors detected: " + deviceSensors.size());

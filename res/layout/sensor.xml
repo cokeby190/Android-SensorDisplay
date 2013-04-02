@@ -118,6 +118,18 @@
 	        android:text="EVENT"
 	        android:textAppearance="?android:attr/textAppearanceLarge"
 	        android:textSize="120sp" />
+
+	    <TextView
+	        android:id="@+id/tv_show_events"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Events" />
+
+	    <TextView
+	        android:id="@+id/tv_gps"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="GPS SPEED" />
 	
 	</LinearLayout>
 </ScrollView>

@@ -1,21 +1,39 @@
 package com.android.fyp.sensors;
 
+import java.util.EnumSet;
+import java.util.HashMap;
+
 public class EventState {
 	
-	private State state_name;
+	private static State currentState;
+	private static HashMap stateMap;
 	
-	//initializing state
-	public EventState(State state) {
+	static {
 		
-		state_name = state;
+		stateMap = new HashMap<State, EnumSet<State>>();
+		
+		stateMap.put(State.ACC, EnumSet.of(State.CONST, State.DEC));
+		stateMap.put(State.DEC, EnumSet.of(State.CONST, State.STOP, State.ACC));
+		stateMap.put(State.CONST, EnumSet.of(State.DEC, State.ACC));
+		stateMap.put(State.STOP, EnumSet.of(State.ACC));
+		
+		currentState = State.STOP;
 	}
 	
-	public State getState() {
-		return state_name;
+	public static boolean checkTransit(State expected) {
+		EnumSet<State> check = (EnumSet<State>) stateMap.get(currentState);
+		if(check.contains(expected))
+			return true;
+		else
+			return false;
 	}
 	
-	public void changeState(State newstate) {
-		state_name = newstate;
+	public static void setCurrent(State current) {
+		if(checkTransit(current))
+			currentState = current;
 	}
 	
+	public static State getState() {
+		return currentState;
+	}
 }
