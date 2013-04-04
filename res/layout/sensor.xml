@@ -3,15 +3,16 @@
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-	<LinearLayout 
+
+	<LinearLayout
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:orientation="vertical" >
-	
+
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" >
-	
+
 	        <Button
 	            android:id="@+id/b_start_log"
 	            android:layout_width="wrap_content"
@@ -19,7 +20,7 @@
 	            android:layout_margin="10dp"
 	            android:background="@drawable/red_button"
 	            android:text="Start Log" />
-	
+
 	        <Button
 	            android:id="@+id/b_end_log"
 	            android:layout_width="wrap_content"
@@ -27,13 +28,12 @@
 	            android:layout_margin="10dp"
 	            android:background="@drawable/red_button"
 	            android:text="End Log" />
-	
 	    </LinearLayout>
-	
+
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" >
-	
+
 	        <Button
 	            android:id="@+id/b_left"
 	            android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
 	            android:minHeight="88dp"
 	            android:minWidth="88dp"
 	            android:text="LEFT" />
-	
+
 	        <Button
 	            android:id="@+id/b_right"
 	            android:layout_width="wrap_content"
@@ -54,11 +54,11 @@
 	            android:minWidth="88dp"
 	            android:text="RIGHT" />
 	    </LinearLayout>
-	
+
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" >
-	
+
 	        <Button
 	            android:id="@+id/b_accel"
 	            android:layout_width="wrap_content"
@@ -68,7 +68,7 @@
 	            android:minHeight="88dp"
 	            android:minWidth="88dp"
 	            android:text="ACC" />
-	
+
 	        <Button
 	            android:id="@+id/b_decel"
 	            android:layout_width="wrap_content"
@@ -79,11 +79,11 @@
 	            android:minWidth="88dp"
 	            android:text="DEC" />
 	    </LinearLayout>
-	
+
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" >
-	
+
 	        <Button
 	            android:id="@+id/b_constant"
 	            android:layout_width="wrap_content"
@@ -94,11 +94,11 @@
 	            android:minWidth="88dp"
 	            android:text="CONSTANT" />
 	    </LinearLayout>
-	
+
 	    <LinearLayout
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content" >
-	
+
 	        <Button
 	            android:id="@+id/b_stop"
 	            android:layout_width="wrap_content"
@@ -109,15 +109,21 @@
 	            android:minWidth="88dp"
 	            android:text="STOP" />
 	    </LinearLayout>
-	
+
 	    <TextView
 	        android:id="@+id/tv_event"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_margin="30dp"
-	        android:text="EVENT"
+	        android:text="STOP"
 	        android:textAppearance="?android:attr/textAppearanceLarge"
 	        android:textSize="120sp" />
+
+	    <TextView
+	        android:id="@+id/tv_gps"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="GPS SPEED" />
 
 	    <TextView
 	        android:id="@+id/tv_show_events"
@@ -125,11 +131,74 @@
 	        android:layout_height="wrap_content"
 	        android:text="Events" />
 
-	    <TextView
-	        android:id="@+id/tv_gps"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="GPS SPEED" />
-	
+	    <!-- <ScrollView
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent" >
+
+	        <LinearLayout
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:orientation="vertical" >
+
+	            <LinearLayout
+	                android:id="@+id/gyro_graph_x"
+	                android:layout_width="fill_parent"
+	                android:layout_height="250dip" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </ScrollView>
+
+	    <ScrollView
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent" >
+
+	        <LinearLayout
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:orientation="vertical" >
+
+	            <LinearLayout
+	                android:id="@+id/gyro_graph_y"
+	                android:layout_width="fill_parent"
+	                android:layout_height="250dip" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </ScrollView>
+
+	    <ScrollView
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent" >
+
+	        <LinearLayout
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:orientation="vertical" >
+
+	            <LinearLayout
+	                android:id="@+id/gyro_graph_z"
+	                android:layout_width="fill_parent"
+	                android:layout_height="250dip" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </ScrollView>
+
+	    <ScrollView
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent" >
+
+	        <LinearLayout
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:orientation="vertical" >
+
+	            <LinearLayout
+	                android:id="@+id/gyro_graph_angle"
+	                android:layout_width="fill_parent"
+	                android:layout_height="250dip" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </ScrollView> -->
+	    
 	</LinearLayout>
+
 </ScrollView>

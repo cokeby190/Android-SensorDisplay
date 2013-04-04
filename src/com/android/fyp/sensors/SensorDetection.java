@@ -5,9 +5,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewSeries.GraphViewStyle;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,9 +29,16 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class SensorDetection extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+	
+	private GraphView graphView;
+	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
+	private LinearLayout layout;
+	
+	private boolean tilt_up = false, tilt_down = false;
 	
 	//UI Buttons
 	private Button b_start_log, b_end_log;
@@ -58,13 +72,31 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 	
 	//Accelerometer
 	private int count = 0;
-	private float noise_thres = (float) 0.09;
+	//threshold for noise
+	private float noise_thres = (float) 0.08;
+	private float gyro_thres = (float) 0.01;
+	//threshold for forward, backward acceleration (acc_x)
+//	private float fwd_thres = (float) 0.8;
+	//higher = less sensitive
+	//lower = more sensitive
+	private float fwd_thres = (float) 0.4;
+	private float back_thres = (float) 0.4;
 	
 	//Gyroscope
 	//to store the integrated angle
 	private double angle_x, angle_y, angle_z, prev_x, prev_y, prev_z;
 	//to convert radians to degree
 	private final float rad2deg = (float) (180.0f / Math.PI);
+	// Create a constant to convert nanoseconds to seconds.
+	private static final float NS2S = 1.0f / 1000000000.0f;
+	private float dT;
+	private float timestamp;
+	//peak detection
+	double max = -10000000;
+	double min = 10000000;
+	//minimal vertical distance between two peaks
+	double dist_peaks = 0.05;
+	boolean g_stationary;
 	
 	//Location Manager
 	private LocationManager locationMgr; 
@@ -83,6 +115,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 	//State Transition
 	//private State prev_state, curr_state;
 	private String event_string = "";
+	private boolean stop = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -114,10 +147,13 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
         
         mAcc = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyro = sensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        //mMagnet = sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mMagnet = sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         
         sensorMgr.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         sensorMgr.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorMgr.registerListener(this, mMagnet, SensorManager.SENSOR_DELAY_NORMAL);
+        //graph();
+        
 	}
 	
 	/**
@@ -373,11 +409,20 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 	 *//*---------------------------------------------------------------------------------------------------------*/
 	public void onSensorChanged(SensorEvent event) {
 		
+		float[] rotationMatrix;
+		
 		switch(event.sensor.getType()) {
 		
 			case Sensor.TYPE_ACCELEROMETER:
 				
 				aData = event.values.clone();
+				
+				rotationMatrix = generateRotationMatrix();
+			
+				if (rotationMatrix != null)
+				{
+					determineOrientation(rotationMatrix);
+				}
 				
 				if(cal_acc != null) {
 					aData[0] = aData[0] - cal_acc[0];
@@ -402,10 +447,61 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 				//--------------------------------- STOP / CONSTANT STATE ----------------------------------------//
 				if((aData[0] > 0 && aData[0] <= aData_calib[0]+noise_thres) || (aData[0] >0 && aData[0] >= aData_calib[0]-noise_thres) ) {
 					//if(prev_state != State.STOP)
-					if(gps_speed == 0.0)
-						EventState.setCurrent(State.STOP);
-					else if(gps_speed >= 2.0)
-						EventState.setCurrent(State.CONST);
+					//if(gps_speed == 0.0 || g_stationary == true) {
+					//if(g_stationary == true) {
+					if(gps_speed == 0.0) {
+						if(EventState.checkTransit(State.STOP)) {
+							stop = true;
+							EventState.setCurrent(State.STOP);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
+						}
+					}
+					else if(gps_speed >= 2.0) {
+						if(EventState.checkTransit(State.CONST)) {
+							stop = false;
+							EventState.setCurrent(State.CONST);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
+						}
+					}
+				}
+				
+				if(fwd_acc >= back_thres) {
+//					if(g_stationary == false) {
+//						if(EventState.checkTransit(State.DEC)) {
+//							stop = false;
+//							EventState.setCurrent(State.DEC);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+//					}
+					if(!tilt_down) {
+						if(EventState.checkTransit(State.DEC)) {
+							stop = false;
+							EventState.setCurrent(State.DEC);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+						}
+					}
+				}
+				else if(fwd_acc <= fwd_thres*-1) {
+//					if(g_stationary == false) {
+//						if(EventState.checkTransit(State.ACC)) {
+//							stop = false;
+//							EventState.setCurrent(State.ACC);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+//					}
+					if(!tilt_up) {
+						if(EventState.checkTransit(State.ACC)) {
+							stop = false;
+							EventState.setCurrent(State.ACC);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+						}
+					}
 				}
 				
 				break;
@@ -414,16 +510,74 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 
 				gData = event.values.clone();
 				
+//				//append data to graph
+//				gyro_x.appendData(new GraphViewData(System.currentTimeMillis(), gData[0]), true);
+//				gyro_y.appendData(new GraphViewData(System.currentTimeMillis(), gData[1]), true);
+//				gyro_z.appendData(new GraphViewData(System.currentTimeMillis(), gData[2]), true);
+//				gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle_z), true);
+				
+				//--------------------------------- GYRO STOP / CONSTANT STATE ----------------------------------------//
+				if((gData[1] > 0 && gData[1] <= cal_gyro[1]+gyro_thres) || (gData[1] >0 && gData[1] >= cal_gyro[1]-gyro_thres) ) {
+					g_stationary = true;
+				}
+				
+				if(timestamp != 0) {
+					dT = (event.timestamp - timestamp) * NS2S;							
+				} 
+				timestamp = event.timestamp;
+				
+				if(gData[2] > max)
+					max = gData[2];
+				else if(gData[2] < min)
+					min = gData[2];
+				
+				if(gData[2] < max - dist_peaks) {
+					integrateGyro(event.timestamp, timestamp, "z", gData[2], dT);
+					if((angle_z - prev_z) > 1.0) {
+						if(EventState.checkDir(State.LEFT)) {
+							EventState.setDir(State.LEFT);
+							tv_event.setText(EventState.getDir().toString());
+							event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
+						}
+					}
+					else if((angle_z - prev_z) < -1.0) {
+						if(EventState.checkDir(State.RIGHT)) {
+							EventState.setDir(State.RIGHT);
+							tv_event.setText(EventState.getDir().toString());
+							event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
+						}
+					}
+					
+					max = gData[2];
+					prev_z = angle_z;
+				} else {
+					EventState.setDir(State.STRAIGHT);
+				}
+				
 				break;
+				
+			case Sensor.TYPE_MAGNETIC_FIELD:
+				
+				mData = event.values.clone();
+				rotationMatrix = generateRotationMatrix();
+				
+				if (rotationMatrix != null)
+				{
+					determineOrientation(rotationMatrix);
+				}
+				break;
+				
 		}
 		
-		tv_event.setText(EventState.getState().toString());
+		tv_show_events.setText(event_string);
+//		tv_event.setText(EventState.getState().toString());
 //		event_string += "State : " + EventState.getState().toString();
 //		tv_show_events.setText(event_string);
 		
 	}
 	
-	public void onAccuracyChanged(Sensor arg0, int arg1) {
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		
 		
 	}
 	
@@ -515,4 +669,150 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 		
 		Log.d("integrate", "angle : " + angle_z);
     }
+	
+	private void graph() {
+		/**------------------------------------------------------------------------------------------------------**
+ 		 * 	---------------------------------------| GYROSCOPE GRAPH |-------------------------------------------*
+ 		 *//*----------------------------------------------------------------------------------------------------*/																										 	
+ 		//Gyroscope graph
+ 		gyro_x = new GraphViewSeries("gyro_x", new GraphViewStyle(Color.rgb(200, 50, 00), 3),new GraphViewData[] {});
+ 		gyro_y = new GraphViewSeries("gyro_y", new GraphViewStyle(Color.rgb(90, 250, 00), 3),new GraphViewData[] {});
+ 		gyro_z = new GraphViewSeries("gyro_z", null ,new GraphViewData[] {});
+ 		gyro_angle = new GraphViewSeries("gyro_angle", new GraphViewStyle(Color.rgb(200, 50, 00), 3) ,new GraphViewData[] {});
+ 		
+ 		// LineGraphView( context, heading)
+ 		graphView = new LineGraphView(this, "Gyroscope Data") {
+ 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+ 			@Override
+ 			protected String formatLabel(double value, boolean isValueX) {
+ 				if (isValueX)
+ 					return formatter.format(value); 	// convert unix time to human time
+ 				else 
+					return super.formatLabel(value, isValueX); // let the y-value be normal-formatted
+ 			}
+ 		};
+
+ 		graphView.addSeries(gyro_x); // data
+ 		graphView.setScrollable(true);
+ 		graphView.setViewPort(1, 80000);
+		//graphView.setScalable(true);
+
+ 		layout = (LinearLayout) findViewById(R.id.gyro_graph_x);
+ 		layout.addView(graphView);
+ 		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_y); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_y);
+		layout.addView(graphView);
+		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_z); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_z);
+		layout.addView(graphView);
+		
+		// LineGraphView( context, heading)
+		graphView = new LineGraphView(this, "Gyroscope Data") {
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
+			@Override
+			protected String formatLabel(double value, boolean isValueX) {
+				if (isValueX)
+					return formatter.format(value); // convert unix time to
+													// human time
+				else
+					return super.formatLabel(value, isValueX); // let the
+																// y-value be
+																// normal-formatted
+			}
+		};
+
+		graphView.addSeries(gyro_angle); // data
+		graphView.setScrollable(true);
+		graphView.setViewPort(1, 80000);
+		// graphView.setScalable(true);
+
+		layout = (LinearLayout) findViewById(R.id.gyro_graph_angle);
+		layout.addView(graphView);
+	}
+	
+	private void determineOrientation(float[] rotationMatrix) {
+		
+		float[] orientationValues = new float[3];
+		SensorManager.getOrientation(rotationMatrix, orientationValues);
+		
+		double azimuth = Math.toDegrees(orientationValues[0]);
+		double pitch = Math.toDegrees(orientationValues[1]);
+		double roll = Math.toDegrees(orientationValues[2]);
+		
+		if (pitch <= 10) {
+			if (roll >= -50 && roll <= -10) {
+				Log.d("Tilt", "Tilt down" + roll);
+				tilt_up = true;
+				tilt_down = false;
+			} else if (roll >= 10 && roll <= 50) {
+				Log.d("Tilt", "Tilt up" + roll);
+				tilt_down = true;
+				tilt_up = false;
+			} else {
+				tilt_up = false;
+				tilt_down = false;
+			}
+		}
+	}
+
+	private float[] generateRotationMatrix() {
+		float[] rotationMatrix = null;
+		if (aData != null && mData != null) {
+			
+			rotationMatrix = new float[16];
+			
+			boolean rotationMatrixGenerated;
+			rotationMatrixGenerated = SensorManager.getRotationMatrix(
+					rotationMatrix, null, aData, mData);
+			
+			if (!rotationMatrixGenerated) {
+				Log.d("Rotation Matrix", "Failed to generate Rotation Matrix");
+				rotationMatrix = null;
+			}
+		}
+		return rotationMatrix;
+	}
 }

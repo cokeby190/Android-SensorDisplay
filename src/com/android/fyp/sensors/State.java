@@ -9,5 +9,6 @@ public enum State {
 	CONST, 
 	STOP, 
 	LEFT, 
-	RIGHT;
+	RIGHT,
+	STRAIGHT;
 }
