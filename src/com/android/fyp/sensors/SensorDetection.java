@@ -455,7 +455,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 						if(gps_speed == 0.0) {
 							if(EventState.checkTransit(State.STOP)) {
 								stop = true;
-								EventState.setCurrent(State.STOP);
+								EventState.setCurrent(State.STOP, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 							}
@@ -463,7 +463,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 						else if(gps_speed >= 2.0) {
 							if(EventState.checkTransit(State.CONST)) {
 								stop = false;
-								EventState.setCurrent(State.CONST);
+								EventState.setCurrent(State.CONST, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 							}
@@ -472,7 +472,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 						if(g_stationary == true) {
 							if(EventState.checkTransit(State.STOP)) {
 								stop = true;
-								EventState.setCurrent(State.STOP);
+								EventState.setCurrent(State.STOP, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 							}
@@ -487,7 +487,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 //						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
 						if(EventState.checkTransit(State.DEC)) {
 							stop = false;
-							EventState.setCurrent(State.DEC);
+							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
@@ -500,7 +500,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 //						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
 						if(EventState.checkTransit(State.ACC)) {
 							stop = false;
-							EventState.setCurrent(State.ACC);
+							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}

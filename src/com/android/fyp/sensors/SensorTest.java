@@ -41,13 +41,14 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 	private boolean tilt_up, tilt_down;
 	private boolean speed_accuracy = false;
 	private boolean entered;
+	//private boolean stationary;
 	
 	//UI Buttons
 	private Button b_start_log, b_end_log;
 	private Button b_left, b_right;
 	private Button b_accel, b_decel;
 	private Button b_constant, b_stop;
-	private TextView tv_event, tv_show_events, tv_gps;
+	private TextView tv_event, tv_show_events, tv_gps, tv_acc;
 	
 	//Dialog 
 	DialogAct_nonSpanned log_dialog;
@@ -166,6 +167,8 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 		tv_event = (TextView) findViewById(R.id.tv_event);
 		tv_show_events = (TextView) findViewById(R.id.tv_show_events);
 		tv_gps = (TextView) findViewById(R.id.tv_gps);
+		
+		tv_acc = (TextView) findViewById(R.id.accelerometer_text);
 		
 		b_start_log = (Button) findViewById(R.id.b_start_log);
 		b_end_log = (Button) findViewById(R.id.b_end_log);
@@ -412,12 +415,17 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 	public void onSensorChanged(SensorEvent event) {
 		
 		float[] rotationMatrix;
+		boolean stationary = true; 
+		long diff_const;
 		
 		switch(event.sensor.getType()) {
 		
 			case Sensor.TYPE_ACCELEROMETER:
 				
 				aData = event.values.clone();
+				
+				//get forward acceleration values - Y AXIS
+				double fwd_acc = aData[1];
 				
 				rotationMatrix = generateRotationMatrix();
 			
@@ -426,79 +434,125 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 					determineOrientation(rotationMatrix);
 				}
 				
-				if(cal_acc != null) {
-					aData[0] = aData[0] - cal_acc[0];
-					aData[1] = aData[1] - cal_acc[1];
-					aData[2] = aData[2] - cal_acc[2];
-					
-					if(count == 0) {
-						aData_calib[0] = aData[0];
-						aData_calib[1] = aData[1];
-						aData_calib[2] = aData[2];
-					}
-						
-					count++;
-					
-				}else {
-					aData_calib = event.values.clone();
-				}
+//				if(cal_acc != null) {
+//					aData[0] = aData[0] - cal_acc[0];
+//					aData[1] = aData[1] - cal_acc[1];
+//					aData[2] = aData[2] - cal_acc[2];
+//					
+//					if(count == 0) {
+//						aData_calib[0] = aData[0];
+//						aData_calib[1] = aData[1];
+//						aData_calib[2] = aData[2];
+//					}
+//						
+//					count++;
+//					
+//				}else {
+//					aData_calib = event.values.clone();
+//				}
+				
 				
 				double check_acceleration = Math.sqrt(aData[1]*aData[1] + aData[2]*aData[2]);
-if(check_acceleration == sensorMgr.GRAVITY_EARTH)
+//				Log.d("ACC", "acc : " + check_acceleration);
+//				Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
 				
+				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
+						"resultant :" + check_acceleration +"\n\n");
+
+				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
-				//get forward acceleration values - Y AXIS
-				double fwd_acc = aData[1];
-				
-				//--------------------------------- STOP / CONSTANT STATE ----------------------------------------//
-				if((aData[1] > 0 && aData[1] <= aData_calib[1]+noise_thres) || (aData[1] >1 && aData[1] >= aData_calib[1]-noise_thres) ) {
-					//if(prev_state != State.STOP)
-					//if(gps_speed == 0.0 || g_stationary == true) {
-					//if(g_stationary == true) {
+				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
 					if(gps_speed == 0.0) {
 						if(EventState.checkTransit(State.STOP)) {
 							stop = true;
-							EventState.setCurrent(State.STOP);
+							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-					else if(gps_speed >= 2.0) {
+					else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
 						if(EventState.checkTransit(State.CONST)) {
 							stop = false;
-							EventState.setCurrent(State.CONST);
+							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-				}
-				
-				if(fwd_acc <= (back_thres*-1)) {
-//					if(g_stationary == false) {
-
-//					if(!tilt_up && !tilt_down) {
-//						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
+				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
+					Log.d("ACC", "acc : " + check_acceleration);
+					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
+					Log.d("fwd_acc", "fwd : " + fwd_acc);
+					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
 							stop = false;
-							EventState.setCurrent(State.DEC);
+							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
-//					}
-				}
-				else if(fwd_acc >= fwd_thres) {
-//					if(g_stationary == false) {
-
-//					if(!tilt_up && !tilt_down) {
-//						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
+					} else if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.ACC)) {
 							stop = false;
-							EventState.setCurrent(State.ACC);
+							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
-//					}
+					}
 				}
+				
+				
+				
+//				//get forward acceleration values - Y AXIS
+//				double fwd_acc = aData[1];
+//				
+//				//--------------------------------- STOP / CONSTANT STATE ----------------------------------------//
+//				if((aData[1] > 0 && aData[1] <= aData_calib[1]+noise_thres) || (aData[1] >1 && aData[1] >= aData_calib[1]-noise_thres) ) {
+//					//if(prev_state != State.STOP)
+//					//if(gps_speed == 0.0 || g_stationary == true) {
+//					//if(g_stationary == true) {
+//					if(gps_speed == 0.0) {
+//						if(EventState.checkTransit(State.STOP)) {
+//							stop = true;
+//							EventState.setCurrent(State.STOP);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+//					}
+//					else if(gps_speed >= 2.0) {
+//						if(EventState.checkTransit(State.CONST)) {
+//							stop = false;
+//							EventState.setCurrent(State.CONST);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+//					}
+//				}
+//				
+//				if(fwd_acc <= (back_thres*-1)) {
+////					if(g_stationary == false) {
+//
+////					if(!tilt_up && !tilt_down) {
+////						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
+//						if(EventState.checkTransit(State.DEC)) {
+//							stop = false;
+//							EventState.setCurrent(State.DEC);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+////					}
+//				}
+//				else if(fwd_acc >= fwd_thres) {
+////					if(g_stationary == false) {
+//
+////					if(!tilt_up && !tilt_down) {
+////						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
+//						if(EventState.checkTransit(State.ACC)) {
+//							stop = false;
+//							EventState.setCurrent(State.ACC);
+//							tv_event.setText(EventState.getState().toString());
+//							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+//						}
+////					}
+//				}
 				
 				break;
 				
@@ -548,10 +602,10 @@ if(check_acceleration == sensorMgr.GRAVITY_EARTH)
 					prev_z = angle_z;
 				} else {
 					EventState.setDir(State.STRAIGHT);
-					if(stop) {
-						tv_event.setText(EventState.getState().toString());
-						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-					}
+//					if(stop) {
+//						tv_event.setText(EventState.getState().toString());
+//						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
+//					}
 				}
 				
 				break;

@@ -3,12 +3,17 @@ package com.android.fyp.sensors;
 import java.util.EnumSet;
 import java.util.HashMap;
 
+import android.text.format.Time;
+
 public class EventState {
 	
 	private static State currentState;
 	private static State currentDir;
 	private static HashMap stateMap;
 	private static HashMap dirMap;
+	
+	private static long start_ts;
+	//private Time stop_ts;
 	
 	static {
 		
@@ -44,8 +49,9 @@ public class EventState {
 			return false;
 	}
 	
-	public static void setCurrent(State current) {
+	public static void setCurrent(State current, long curr_time) {
 		currentState = current;
+		start_ts = curr_time;
 	}
 	
 	public static void setDir(State direction) {
@@ -58,5 +64,9 @@ public class EventState {
 	
 	public static State getDir() {
 		return currentDir;
+	}
+	
+	public static long getStartTs() {
+		return start_ts;
 	}
 }

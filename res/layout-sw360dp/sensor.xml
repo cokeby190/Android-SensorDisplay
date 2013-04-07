@@ -117,7 +117,7 @@
 	        android:layout_margin="30dp"
 	        android:text="STOP"
 	        android:textAppearance="?android:attr/textAppearanceLarge"
-	        android:textSize="120sp" />
+	        android:textSize="100sp" />
 
 	    <TextView
 	        android:id="@+id/tv_gps"
