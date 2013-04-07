@@ -30,7 +30,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private boolean acc = false, gyro = false;
 	
 	//UI Elements
-	private Button b_caliberate, b_caliberate2, b_caliberate3, b_caliberate4;
+	private Button b_caliberate, b_caliberate2, b_caliberate3, 
+		b_caliberate4, b_caliberate5;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,8 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         b_caliberate3.setOnClickListener(this);
         b_caliberate4 = (Button) findViewById(R.id.b_caliberate4);
         b_caliberate4.setOnClickListener(this);
+        b_caliberate5 = (Button) findViewById(R.id.b_caliberate5);
+        b_caliberate5.setOnClickListener(this);
         
         //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
@@ -159,6 +162,20 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					send_data4.putFloatArray("Gyro", gData);
 				cal_data4.putExtras(send_data4);
 				startActivity(cal_data4);
+				break;
+				
+			case R.id.b_caliberate5:
+				
+				Intent cal_data5 = new Intent(this, SensorConstStop.class);
+				Bundle send_data5 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data5.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data5.putFloatArray("Gyro", gData);
+				cal_data5.putExtras(send_data5);
+				startActivity(cal_data5);
 				break;
 		}
 	}

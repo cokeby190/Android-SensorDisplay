@@ -32,7 +32,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class SensorTest extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
@@ -456,13 +456,16 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 //				Log.d("ACC", "acc : " + check_acceleration);
 //				Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
 				
+				double abs_acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
+				
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
-						"resultant :" + check_acceleration +"\n\n");
+						"resultant :" + check_acceleration +"\n" + "abs_acc : " + abs_acceleration + "\n\n");
 
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
 				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
-					if(gps_speed == 0.0) {
+					//if(gps_speed == 0.0) {
+					if(abs_acceleration == 0.0) {
 						if(EventState.checkTransit(State.STOP)) {
 							stop = true;
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
@@ -470,7 +473,8 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-					else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
+					//else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
+					else if(abs_acceleration == 0.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
 							stop = false;
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
@@ -479,9 +483,9 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 						}
 					}
 				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
-//					Log.d("ACC", "acc : " + check_acceleration);
-//					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-//					Log.d("fwd_acc", "fwd : " + fwd_acc);
+					Log.d("ACC", "acc : " + check_acceleration);
+					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
+					Log.d("fwd_acc", "fwd : " + fwd_acc);
 					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
 							stop = false;

@@ -41,6 +41,10 @@
             android:name=".SensorTest"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name=".SensorConstStop"
+            android:label="@string/app_name" >
+        </activity>
     </application>
 
 </manifest>
