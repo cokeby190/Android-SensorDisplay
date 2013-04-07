@@ -1,9 +1,12 @@
 package com.android.fyp.sensors;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -42,6 +45,9 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 	private boolean speed_accuracy = false;
 	private boolean entered;
 	//private boolean stationary;
+	
+//	private List<EventList> listEvents = new ArrayList<EventList>();
+	//Map<State, List<Long>> map = new HashMap<State, List<Long>>();
 	
 	//UI Buttons
 	private Button b_start_log, b_end_log;
@@ -465,6 +471,7 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 					if(gps_speed == 0.0) {
 						if(EventState.checkTransit(State.STOP)) {
 							stop = true;
+							//long event_time = System.currentTimeMillis() - EventState.getStartTs();
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
