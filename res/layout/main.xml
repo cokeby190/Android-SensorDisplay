@@ -37,12 +37,29 @@
             android:gravity="center_vertical"
             android:text="Caliberate Device NEW" />
 
+        <Button
+            android:id="@+id/b_caliberate3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_vertical"
+            android:text="Caliberate Device LINEAR" />
+
+        <Button
+            android:id="@+id/b_caliberate4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_vertical"
+            android:text="Caliberate Device Test" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" >
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible" >
 
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
 

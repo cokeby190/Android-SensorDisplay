@@ -30,7 +30,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	private boolean acc = false, gyro = false;
 	
 	//UI Elements
-	private Button b_caliberate, b_caliberate2;
+	private Button b_caliberate, b_caliberate2, b_caliberate3, b_caliberate4;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +49,10 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         b_caliberate.setOnClickListener(this);
         b_caliberate2 = (Button) findViewById(R.id.b_caliberate2);
         b_caliberate2.setOnClickListener(this);
+        b_caliberate3 = (Button) findViewById(R.id.b_caliberate3);
+        b_caliberate3.setOnClickListener(this);
+        b_caliberate4 = (Button) findViewById(R.id.b_caliberate4);
+        b_caliberate4.setOnClickListener(this);
         
         //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
@@ -127,6 +131,34 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					send_data2.putFloatArray("Gyro", gData);
 				cal_data2.putExtras(send_data2);
 				startActivity(cal_data2);
+				break;
+				
+			case R.id.b_caliberate3:
+				
+				Intent cal_data3 = new Intent(this, SensorLinear.class);
+				Bundle send_data3 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data3.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data3.putFloatArray("Gyro", gData);
+				cal_data3.putExtras(send_data3);
+				startActivity(cal_data3);
+				break;
+				
+			case R.id.b_caliberate4:
+				
+				Intent cal_data4 = new Intent(this, SensorTest.class);
+				Bundle send_data4 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data4.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data4.putFloatArray("Gyro", gData);
+				cal_data4.putExtras(send_data4);
+				startActivity(cal_data4);
 				break;
 		}
 	}

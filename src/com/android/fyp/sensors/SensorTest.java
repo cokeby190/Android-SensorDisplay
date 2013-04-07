@@ -32,7 +32,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class SensorDetection extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+public class SensorTest extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
@@ -81,8 +81,8 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 //	private float fwd_thres = (float) 0.8;
 	//higher = less sensitive
 	//lower = more sensitive
-	private float fwd_thres = (float) 0.8;
-	private float back_thres = (float) 0.8;
+	private float fwd_thres = (float) 0.5;
+	private float back_thres = (float) 0.4;
 	
 	//Gyroscope
 	//to store the integrated angle
@@ -443,6 +443,10 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 					aData_calib = event.values.clone();
 				}
 				
+				double check_acceleration = Math.sqrt(aData[1]*aData[1] + aData[2]*aData[2]);
+if(check_acceleration == sensorMgr.GRAVITY_EARTH)
+				
+				
 				//get forward acceleration values - Y AXIS
 				double fwd_acc = aData[1];
 				
@@ -451,36 +455,25 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 					//if(prev_state != State.STOP)
 					//if(gps_speed == 0.0 || g_stationary == true) {
 					//if(g_stationary == true) {
-					if(speed_accuracy) {
-						if(gps_speed == 0.0) {
-							if(EventState.checkTransit(State.STOP)) {
-								stop = true;
-								EventState.setCurrent(State.STOP);
-								tv_event.setText(EventState.getState().toString());
-								event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-							}
+					if(gps_speed == 0.0) {
+						if(EventState.checkTransit(State.STOP)) {
+							stop = true;
+							EventState.setCurrent(State.STOP);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
-						else if(gps_speed >= 2.0) {
-							if(EventState.checkTransit(State.CONST)) {
-								stop = false;
-								EventState.setCurrent(State.CONST);
-								tv_event.setText(EventState.getState().toString());
-								event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
-							}
-						}
-					} else {
-						if(g_stationary == true) {
-							if(EventState.checkTransit(State.STOP)) {
-								stop = true;
-								EventState.setCurrent(State.STOP);
-								tv_event.setText(EventState.getState().toString());
-								event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-							}
+					}
+					else if(gps_speed >= 2.0) {
+						if(EventState.checkTransit(State.CONST)) {
+							stop = false;
+							EventState.setCurrent(State.CONST);
+							tv_event.setText(EventState.getState().toString());
+							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}
 				
-				if(fwd_acc >= back_thres) {
+				if(fwd_acc <= (back_thres*-1)) {
 //					if(g_stationary == false) {
 
 //					if(!tilt_up && !tilt_down) {
@@ -493,7 +486,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 						}
 //					}
 				}
-				else if(fwd_acc <= (fwd_thres*-1)) {
+				else if(fwd_acc >= fwd_thres) {
 //					if(g_stationary == false) {
 
 //					if(!tilt_up && !tilt_down) {

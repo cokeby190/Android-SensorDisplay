@@ -32,7 +32,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class SensorDetection extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+public class SensorLinear extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
@@ -147,7 +147,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
         //Sensor Manager
         sensorMgr = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         
-        mAcc = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mAcc = sensorMgr.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         mGyro = sensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mMagnet = sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         
@@ -415,7 +415,7 @@ public class SensorDetection extends Activity implements OnClickListener, Sensor
 		
 		switch(event.sensor.getType()) {
 		
-			case Sensor.TYPE_ACCELEROMETER:
+			case Sensor.TYPE_LINEAR_ACCELERATION:
 				
 				aData = event.values.clone();
 				
