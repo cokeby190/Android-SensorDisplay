@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -34,18 +33,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private LinearLayout layout;
-	
-	private boolean tilt_up, tilt_down;
-	private boolean speed_accuracy = false;
-	private boolean entered;
-	//private boolean stationary;
+
 	private List<State> q_state = new ArrayList<State>();
 	private List<Long> q_time = new ArrayList<Long>();
 	
@@ -73,20 +67,17 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	
 	//Sensor Manager
 	private SensorManager sensorMgr;
-	private List<Sensor> deviceSensors;
-	private Sensor mAcc, mGyro, mMagnet, mLight, mProx, mTemp;
+	private Sensor mAcc, mGyro, mMagnet;
 	private float[] aData = new float[3];
 	private float[] gData = new float[3];
 	private float[] mData = new float[3];
-	private float[] aData_calib = new float[3];
 	
 	//Accelerometer
 	private int count = 0;
 	//threshold for noise
-	private float noise_thres = (float) 0.09;
+	//private float noise_thres = (float) 0.09;
 	private float gyro_thres = (float) 0.01;
 	//threshold for forward, backward acceleration (acc_x)
-//	private float fwd_thres = (float) 0.8;
 	//higher = less sensitive
 	//lower = more sensitive
 	private float fwd_thres = (float) 0.5;
@@ -123,9 +114,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private float[] cal_gyro = new float[3];
 	
 	//State Transition
-	//private State prev_state, curr_state;
 	private String event_string = "";
-	private boolean stop = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -422,8 +411,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	 *//*---------------------------------------------------------------------------------------------------------*/
 	public void onSensorChanged(SensorEvent event) {
 		
-		float[] rotationMatrix;
-		boolean stationary = true; 
 		long diff_const;
 		
 		switch(event.sensor.getType()) {
@@ -433,41 +420,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				aData = event.values.clone();
 				
 				//get forward acceleration values - Y AXIS
-				double fwd_acc = aData[1];
-				
-				rotationMatrix = generateRotationMatrix();
-			
-				if (rotationMatrix != null)
-				{
-					determineOrientation(rotationMatrix);
-				}
-				
-//				if(cal_acc != null) {
-//					aData[0] = aData[0] - cal_acc[0];
-//					aData[1] = aData[1] - cal_acc[1];
-//					aData[2] = aData[2] - cal_acc[2];
-//					
-//					if(count == 0) {
-//						aData_calib[0] = aData[0];
-//						aData_calib[1] = aData[1];
-//						aData_calib[2] = aData[2];
-//					}
-//						
-//					count++;
-//					
-//				}else {
-//					aData_calib = event.values.clone();
-//				}
-				
-				
+				double fwd_acc = aData[1];				
+
 				double check_acceleration = Math.sqrt(aData[1]*aData[1] + aData[2]*aData[2]);
-//				Log.d("ACC", "acc : " + check_acceleration);
-//				Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-				
-//				double abs_acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
-				
-//				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
-//						"resultant :" + check_acceleration +"\n" + "abs_acc : " + abs_acceleration + "\n\n");
 				
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
 						"resultant :" + check_acceleration +"\n\n");
@@ -477,49 +432,35 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				
 				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
 					if(gps_speed == 0.0) {
-					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
-//							stop = true;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
-							processStateList(State.STOP, "STOPPPPPPP");
+							processStateList(State.STOP, "STOP");
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-					//else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
-					//else if(abs_acceleration > sensorMgr.GRAVITY_EARTH && diff_const > 5000) {
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.CONST, "CONSTANT SPEED");
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
-//					Log.d("ACC", "acc : " + check_acceleration);
-//					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-//					Log.d("fwd_acc", "fwd : " + fwd_acc);
 					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.DEC, "DECELERATE");
 							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					} else if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.ACC)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.ACC, "ACCELERATE");
 							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}
@@ -612,7 +553,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							processStateList(State.LEFT, "LEFT");
 							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							//event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
@@ -621,7 +561,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							processStateList(State.RIGHT, "RIGHT");
 							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							//event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					
@@ -629,10 +568,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					prev_z = angle_z;
 				} else {
 					EventState.setDir_str(State.STRAIGHT);
-//					if(stop) {
-//						tv_event.setText(EventState.getState().toString());
-//						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-//					}
 				}
 				
 				break;
@@ -640,12 +575,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			case Sensor.TYPE_MAGNETIC_FIELD:
 				
 				mData = event.values.clone();
-				rotationMatrix = generateRotationMatrix();
-				
-				if (rotationMatrix != null)
-				{
-					determineOrientation(rotationMatrix);
-				}
+
 				break;
 				
 		}
@@ -671,11 +601,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	 *//*---------------------------------------------------------------------------------------------------------*/	
 	public void onLocationChanged(Location location) {
 		updateLocation(location);
-		
-		if(location.getAccuracy() == Criteria.ACCURACY_FINE)
-			speed_accuracy = true;
-		else
-			speed_accuracy = false;
 	}
 
 	public void onProviderDisabled(String arg0) {
@@ -864,60 +789,32 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		layout.addView(graphView);
 	}
 	
-	//determine orientation so as to prevent Acc & Dec
-	private void determineOrientation(float[] rotationMatrix) {
-		
-		float[] orientationValues = new float[3];
-		SensorManager.getOrientation(rotationMatrix, orientationValues);
-		
-		double azimuth = Math.toDegrees(orientationValues[0]);
-		double pitch = Math.toDegrees(orientationValues[1]);
-		double roll = Math.toDegrees(orientationValues[2]);
-		
-		if (pitch <= 10) {
-			
-			if (roll >= -50 && roll <= -10) {
-				Log.d("Tilt", "Tilt down" + roll);
-				tilt_down = true;
-				tilt_up = false;
-			} else if (roll >= 10 && roll <= 50) {
-				Log.d("Tilt", "Tilt up" + roll);
-				tilt_up = true;
-				tilt_down = false;
-			} else {
-				tilt_up = false;
-				tilt_down = false;
-			}
-		}
-	}
-
-	//get rotation matrix to earth coordinates
-	private float[] generateRotationMatrix() {
-		float[] rotationMatrix = null;
-		if (aData != null && mData != null) {
-			
-			rotationMatrix = new float[16];
-			
-			boolean rotationMatrixGenerated;
-			rotationMatrixGenerated = SensorManager.getRotationMatrix(
-					rotationMatrix, null, aData, mData);
-			
-			if (!rotationMatrixGenerated) {
-				Log.d("Rotation Matrix", "Failed to generate Rotation Matrix");
-				rotationMatrix = null;
-			}
-		}
-		return rotationMatrix;
-	}
-	
 	private void processStateList(State state, String msg) {
 		if(q_state.isEmpty()) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += time_stamp("time") + "\t" + msg + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
 		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += time_stamp("time") + "\t" + msg + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
 	}
 	

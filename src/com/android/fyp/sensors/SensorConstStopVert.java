@@ -947,8 +947,4 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 			event_string += "\nTime : " + convert + aggressive + "\n";
 		}
 	}
-	
-	private void checktime() {
-		
-	}
 }
