@@ -1,9 +1,11 @@
 package com.android.fyp.sensors;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -31,6 +33,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
@@ -42,6 +45,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private boolean speed_accuracy = false;
 	private boolean entered;
 	//private boolean stationary;
+	private List<State> q_state = new ArrayList<State>();
+	private List<Long> q_time = new ArrayList<Long>();
 	
 	//UI Buttons
 	private Button b_start_log, b_end_log;
@@ -464,8 +469,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
 				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
-					//if(gps_speed == 0.0) {
-					if(abs_acceleration == 0.0) {
+					if(gps_speed == 0.0) {
+					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
 							stop = true;
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
@@ -474,7 +479,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 						}
 					}
 					//else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
-					else if(abs_acceleration == 0.0 && diff_const > 5000) {
+					//else if(abs_acceleration > sensorMgr.GRAVITY_EARTH && diff_const > 5000) {
+					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
 							stop = false;
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
@@ -502,8 +508,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 						}
 					}
 				}
-				
-				
 				
 //				//get forward acceleration values - Y AXIS
 //				double fwd_acc = aData[1];
@@ -628,6 +632,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 		
 		tv_show_events.setText(event_string);
+		if(q_state != null && !q_state.isEmpty() && q_time != null && !q_time.isEmpty()) {
+			Toast.makeText(this, "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1), Toast.LENGTH_SHORT);
+			Log.d("TIME", "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1));
+		}
 //		tv_event.setText(EventState.getState().toString());
 //		event_string += "State : " + EventState.getState().toString();
 //		tv_show_events.setText(event_string);
