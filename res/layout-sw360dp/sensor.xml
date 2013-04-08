@@ -124,7 +124,7 @@
 			    android:id="@+id/iv_warning"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:layout_gravity="center_vertical"
+			    android:layout_gravity="bottom"
 			    android:layout_margin="20dp"
 			    android:src="@drawable/android_warning"
 			    android:visibility="invisible" />

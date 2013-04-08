@@ -25,6 +25,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -111,9 +112,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private final double fwd_thres = 0.5;
 	private final double back_thres = 0.4;
 	//accelerationfast
-	private final double acc_aggr = 2.5;
+	private final double acc_aggr = 10;
 	//accelerationturnfast
-	private final double acc_turn_aggr = 1.5;
+	private final double acc_turn_aggr = 7;
 	
 	//Location Manager
 	private LocationManager locationMgr; 
@@ -421,7 +422,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 						"resultant :" + check_acceleration +"\n\n");
 				
 				//relative acceleration
-				rel_acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+				rel_acc = Math.abs(fwd_acc - sensorMgr.GRAVITY_EARTH);
 
 				//time duration for the event
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
@@ -457,10 +458,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.DEC, "DECELERATE");
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
-								tv_event.setText(EventState.getState().toString());
+								tv_event.setText(EventState.getState().toString() + " " + rel_acc);
 								
 								dec_check = true;
-								acc_aggressive(rel_acc); 
+								//acc_aggressive(rel_acc); 
 							}
 						} //ACCELERATION (FLAT) ----------------------------------------------------------------------------------------//
 						else if(fwd_acc >= fwd_thres) {
@@ -468,7 +469,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.ACC, "ACCELERATE");
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
-								tv_event.setText(EventState.getState().toString());
+								tv_event.setText(EventState.getState().toString()  + " " + rel_acc);
 								
 								acc_check = true;
 								acc_aggressive(rel_acc);
@@ -482,10 +483,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.DEC, "DECELERATE");
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
-								tv_event.setText(EventState.getState().toString());
+								tv_event.setText(EventState.getState().toString() + " " + rel_acc);
 
 								dec_check = true;
-								acc_aggressive(rel_acc);
+								//acc_aggressive(rel_acc);
 							}
 						} 	//ACCELERATION (VERT)----------------------------------------------------------------------------------------// 
 						else if(fwd_acc <= (back_thres*-1)) {
@@ -493,7 +494,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.ACC, "ACCELERATE");
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
-								tv_event.setText(EventState.getState().toString());
+								tv_event.setText(EventState.getState().toString() + " " + rel_acc);
 								
 								acc_check = true;
 								acc_aggressive(rel_acc);
@@ -854,12 +855,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//IF ACCELERATION IS AGGRESSIVE
 	private void acc_aggressive(double rel_acc) {
 		if(rel_acc >= acc_aggr) {
-			iv_warn.setVisibility(View.VISIBLE);
-			
 			aggr_save_log(EventState.getState().toString());
+			
+			new show_warning().execute();
 		}
-		else 
-			iv_warn.setVisibility(View.INVISIBLE);
 	}
 	
 	//saving aggressive events
@@ -886,5 +885,27 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private void cannotTag() {
 		alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
 		alert_log.show();
+	}
+	
+	private class show_warning extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			
+			iv_warn.setVisibility(View.VISIBLE);
+			
+			try {
+				Thread.sleep(150);
+			} catch(Exception e){};
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			
+			iv_warn.setVisibility(View.INVISIBLE);
+		}
 	}
 }
