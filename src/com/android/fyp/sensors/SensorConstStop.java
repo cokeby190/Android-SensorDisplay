@@ -461,10 +461,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 //				Log.d("ACC", "acc : " + check_acceleration);
 //				Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
 				
-				double abs_acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
+//				double abs_acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
+				
+//				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
+//						"resultant :" + check_acceleration +"\n" + "abs_acc : " + abs_acceleration + "\n\n");
 				
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
-						"resultant :" + check_acceleration +"\n" + "abs_acc : " + abs_acceleration + "\n\n");
+						"resultant :" + check_acceleration +"\n\n");
+
 
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
@@ -472,7 +476,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					if(gps_speed == 0.0) {
 					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
-							stop = true;
+//							stop = true;
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
@@ -482,26 +486,26 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					//else if(abs_acceleration > sensorMgr.GRAVITY_EARTH && diff_const > 5000) {
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
-							stop = false;
+//							stop = false;
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
-					Log.d("ACC", "acc : " + check_acceleration);
-					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-					Log.d("fwd_acc", "fwd : " + fwd_acc);
+//					Log.d("ACC", "acc : " + check_acceleration);
+//					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
+//					Log.d("fwd_acc", "fwd : " + fwd_acc);
 					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
-							stop = false;
+//							stop = false;
 							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					} else if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.ACC)) {
-							stop = false;
+//							stop = false;
 							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
