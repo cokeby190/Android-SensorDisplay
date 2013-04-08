@@ -228,23 +228,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				Intent cal_data6 = new Intent(this, SensorConstStop.class);
 				cal_data6.putExtra("orientation", "flat");
 				startActivity(cal_data6);
-				
-//				if(face_flat == true) {
-//					Intent cal_data6 = new Intent(this, SensorConstStop.class);
-//					cal_data6.putExtra("orientation", "flat");
-//					startActivity(cal_data6);
-//				} else if(face_up == true) {
-//					ErrorOrientation();
-//				}
-//				Bundle send_data6 = new Bundle();
-//				if(acc == true)
-//					//cal_data.putExtra("Acc", aData);
-//					send_data6.putFloatArray("Acc", aData);
-//				if(gyro == true)
-//					//cal_data.putExtra("Gyro", gData);
-//					send_data6.putFloatArray("Gyro", gData);
-//				cal_data6.putExtras(send_data6);
-//				startActivity(cal_data6);
+			
 				break;
 				
 			case R.id.ib_vert:
@@ -253,23 +237,6 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				cal_data7.putExtra("orientation", "vert");
 				startActivity(cal_data7);
 				
-//				if(face_up == true) {
-//					Intent cal_data7 = new Intent(this, SensorConstStop.class);
-//					cal_data7.putExtra("orientation", "vert");
-//					startActivity(cal_data7);
-//				} else if(face_flat == true) {
-//					ErrorOrientation();
-//				}
-
-//				Bundle send_data7 = new Bundle();
-//				if(acc == true)
-//					//cal_data.putExtra("Acc", aData);
-//					send_data7.putFloatArray("Acc", aData);
-//				if(gyro == true)
-//					//cal_data.putExtra("Gyro", gData);
-//					send_data7.putFloatArray("Gyro", gData);
-//				cal_data7.putExtras(send_data7);
-//				startActivity(cal_data7);
 				break;
 		}
 	}
