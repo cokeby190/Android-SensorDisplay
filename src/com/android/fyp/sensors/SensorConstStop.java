@@ -477,9 +477,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
 //							stop = true;
+							processStateList(State.STOP, "STOPPPPPPP");
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
+							//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 					//else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
@@ -487,9 +488,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
 //							stop = false;
+							processStateList(State.CONST, "CONSTANT SPEED");
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
+							//event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
@@ -499,16 +501,18 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
 //							stop = false;
+							processStateList(State.DEC, "DECELERATE");
 							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+							//event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					} else if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.ACC)) {
 //							stop = false;
+							processStateList(State.ACC, "ACCELERATE");
 							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+							//event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}
@@ -597,16 +601,18 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					integrateGyro(event.timestamp, timestamp, "z", gData[2], dT);
 					if((angle_z - prev_z) > 1.0) {
 						if(EventState.checkDir(State.LEFT)) {
+							processStateList(State.LEFT, "LEFT");
 							EventState.setDir(State.LEFT);
 							tv_event.setText(EventState.getDir().toString());
-							event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
+							//event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
 						if(EventState.checkDir(State.RIGHT)) {
+							processStateList(State.RIGHT, "RIGHT");
 							EventState.setDir(State.RIGHT);
 							tv_event.setText(EventState.getDir().toString());
-							event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
+							//event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					
@@ -636,10 +642,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 		
 		tv_show_events.setText(event_string);
-		if(q_state != null && !q_state.isEmpty() && q_time != null && !q_time.isEmpty()) {
-			Toast.makeText(this, "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1), Toast.LENGTH_SHORT);
-			Log.d("TIME", "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1));
-		}
+//		if(q_state != null && !q_state.isEmpty() && q_time != null && !q_time.isEmpty()) {
+//			Toast.makeText(this, "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1), Toast.LENGTH_SHORT);
+//			Log.d("TIME", "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1));
+//		}
 //		tv_event.setText(EventState.getState().toString());
 //		event_string += "State : " + EventState.getState().toString();
 //		tv_show_events.setText(event_string);
@@ -895,10 +901,16 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		return rotationMatrix;
 	}
 	
-	private void processStateList(State state) {
-		if(q_state.isEmpty())
+	private void processStateList(State state, String msg) {
+		if(q_state.isEmpty()) {
 			q_state.add(state);
-		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state)
+			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+		}
+		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state) {
 			q_state.add(state);
+			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+		}
+		
+		//tv_show_events.setText(event_string);
 	}
 }
