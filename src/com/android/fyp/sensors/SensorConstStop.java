@@ -894,4 +894,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 		return rotationMatrix;
 	}
+	
+	private void processStateList(State state) {
+		if(q_state.isEmpty())
+			q_state.add(state);
+		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state)
+			q_state.add(state);
+	}
 }
