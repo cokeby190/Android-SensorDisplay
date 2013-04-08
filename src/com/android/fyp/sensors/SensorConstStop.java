@@ -83,6 +83,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//threshold for noise
 	//private float noise_thres = (float) 0.09;
 	//private float gyro_thres = (float) 0.01;
+	//relative acceleration
+	double rel_acc = 0;
+	private boolean acc_check = false, dec_check = false;
 	
 	//Gyroscope
 	//to store the integrated angle
@@ -109,6 +112,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private final double back_thres = 0.4;
 	//accelerationfast
 	private final double acc_aggr = 2.5;
+	//accelerationturnfast
+	private final double acc_turn_aggr = 1.5;
 	
 	//Location Manager
 	private LocationManager locationMgr; 
@@ -414,6 +419,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
 						"resultant :" + check_acceleration +"\n\n");
+				
+				//relative acceleration
+				rel_acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
 
 				//time duration for the event
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
@@ -451,7 +459,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								acc_aggressive(fwd_acc); 
+								dec_check = true;
+								acc_aggressive(rel_acc); 
 							}
 						} //ACCELERATION (FLAT) ----------------------------------------------------------------------------------------//
 						else if(fwd_acc >= fwd_thres) {
@@ -461,7 +470,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								acc_aggressive(fwd_acc);
+								acc_check = true;
+								acc_aggressive(rel_acc);
 							}
 						}
 					} //VERTICAL ORIENTATION ----------------------------------------------------------------------------------------//
@@ -474,7 +484,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 
-								acc_aggressive(fwd_acc);
+								dec_check = true;
+								acc_aggressive(rel_acc);
 							}
 						} 	//ACCELERATION (VERT)----------------------------------------------------------------------------------------// 
 						else if(fwd_acc <= (back_thres*-1)) {
@@ -484,7 +495,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								acc_aggressive(fwd_acc);
+								acc_check = true;
+								acc_aggressive(rel_acc);
 							}
 						}
 					}
@@ -522,6 +534,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							processStateList(State.LEFT, "LEFT");
 							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
+							
+							if(acc_check == true && rel_acc >= acc_turn_aggr) {
+								iv_warn.setVisibility(View.VISIBLE);
+								aggr_save_log("RISKY LEFT TURN");
+							}
+							else 
+								iv_warn.setVisibility(View.INVISIBLE);
+							
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
@@ -530,6 +550,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							processStateList(State.RIGHT, "RIGHT");
 							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
+							
+							if(acc_check == true && rel_acc >= acc_turn_aggr) {
+								iv_warn.setVisibility(View.VISIBLE);
+								
+								aggr_save_log("RISKY RIGHT TURN");
+							}
+							else 
+								iv_warn.setVisibility(View.INVISIBLE);
 						}
 					}
 					
@@ -551,11 +579,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		
 		tv_show_events.setText(event_string);
 		
+		acc_check = false;
+		dec_check = false;
 	}
 	
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		
-		
 	}
 	
 	/**-----------------------------------------------------------------------------------------------------------**
@@ -566,15 +594,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	}
 
 	public void onProviderDisabled(String arg0) {
-		
 	}
 
 	public void onProviderEnabled(String arg0) {
-		
 	}
 
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-		
 	}
 	
 	private void updateLocation(Location location) {
@@ -789,16 +814,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
-				
-//				//log the event to the file
-//				if(start_log == true && end_log == true) {
-//					//save to SD
-//					drive_log += time_stamp("time") + "\t" + q_state.get(0) + "\t" + convert + "\n";
-//					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-//					
-//					drive_log = "";
-//				}
-				
 				aggr_save_log(q_state.get(0) + "\t" + convert);
 			}
 			else 
@@ -819,16 +834,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
-				
-//				//log the event to the file
-//				if(start_log == true && end_log == true) {
-//					//save to SD
-//					drive_log += time_stamp("time") + "\t" + q_state.get(q_state.size()-1) + "\t" + convert + "\n";
-//					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-//					
-//					drive_log = "";
-//				}
-//				
 				aggr_save_log(q_state.get(q_state.size()-1) + "\t" + convert);
 			}
 			else 
@@ -847,9 +852,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	}
 
 	//IF ACCELERATION IS AGGRESSIVE
-	private void acc_aggressive(double fwd_acc) {
-		double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
-		if(acc > acc_aggr) {
+	private void acc_aggressive(double rel_acc) {
+		if(rel_acc >= acc_aggr) {
 			iv_warn.setVisibility(View.VISIBLE);
 			
 			aggr_save_log(EventState.getState().toString());

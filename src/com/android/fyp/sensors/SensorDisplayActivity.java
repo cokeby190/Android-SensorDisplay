@@ -1,6 +1,7 @@
 package com.android.fyp.sensors;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -23,13 +24,20 @@ import android.widget.ImageButton;
  */
 public class SensorDisplayActivity extends Activity implements OnClickListener {
 	
+	private boolean face_up, face_flat;
+	
+	//Dialog 
+	DialogAct_nonSpanned log_dialog;
+	AlertDialog alert_log;
+
 	//Sensor Manager
 	private SensorManager mSensorManager;
 	private SensorEventListener mSensorListener;
-	private Sensor mAccelerometer, mGyroscope;
+	private Sensor mAccelerometer, mGyroscope, mMagnet;
 	private float [] aData = new float[3];
 	private float [] gData = new float[3];
-	private boolean acc = false, gyro = false;
+	private float [] mData = new float[3];
+	private boolean acc = false, gyro = false, magnet = false;
 	
 	//UI Elements
 	private Button b_caliberate, b_caliberate2, b_caliberate3, 
@@ -44,10 +52,12 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mMagnet = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         
         //Register Sensor Listener for all the sensors in the device. 
         mSensorManager.registerListener(mSensorListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(mSensorListener, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(mSensorListener, mMagnet, SensorManager.SENSOR_DELAY_NORMAL);
         
         b_caliberate = (Button) findViewById(R.id.b_caliberate);
         b_caliberate.setOnClickListener(this);
@@ -74,9 +84,19 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 
 			public void onSensorChanged(SensorEvent event) {
 				
+				float[] rotationMatrix;
+				
 				switch(event.sensor.getType()) {
 					case Sensor.TYPE_ACCELEROMETER:
 						aData = event.values.clone();
+						
+						rotationMatrix = generateRotationMatrix();
+						
+						if (rotationMatrix != null)
+						{
+							determineOrientation(rotationMatrix);
+						}
+						
 						if(event.values[0] != 0.0 && event.values[1] != 0.0 && event.values[2] != 0.0)
 							acc = true;
 						break;
@@ -84,6 +104,19 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 						gData = event.values.clone();
 						if(event.values[0] != 0.0 && event.values[1] != 0.0 && event.values[2] != 0.0)
 							gyro = true;
+						break;
+					case Sensor.TYPE_MAGNETIC_FIELD:
+						mData = event.values.clone();
+						
+						rotationMatrix = generateRotationMatrix();
+						
+						if (rotationMatrix != null)
+						{
+							determineOrientation(rotationMatrix);
+						}
+						
+						if(event.values[0] != 0.0 && event.values[1] != 0.0 && event.values[2] != 0.0)
+							magnet = true;
 						break;
 						
 				}
@@ -98,6 +131,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	// accelerometer sensors
     	mSensorManager.registerListener(mSensorListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     	mSensorManager.registerListener(mSensorListener, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+    	mSensorManager.registerListener(mSensorListener, mMagnet, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -106,12 +140,15 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
     	super.onPause();
     	mSensorManager.unregisterListener(mSensorListener, mAccelerometer);
     	mSensorManager.unregisterListener(mSensorListener, mGyroscope);
+    	mSensorManager.unregisterListener(mSensorListener, mMagnet);
     }
     
 	/**
 	 * OnClick Listener
 	 */
 	public void onClick(View v) {
+		
+		log_dialog = new DialogAct_nonSpanned();
 
 		//Show the dialog when the user clicks the button
 		switch(v.getId()) {
@@ -190,6 +227,15 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 				Intent cal_data6 = new Intent(this, SensorConstStop.class);
 				cal_data6.putExtra("orientation", "flat");
+				startActivity(cal_data6);
+				
+//				if(face_flat == true) {
+//					Intent cal_data6 = new Intent(this, SensorConstStop.class);
+//					cal_data6.putExtra("orientation", "flat");
+//					startActivity(cal_data6);
+//				} else if(face_up == true) {
+//					ErrorOrientation();
+//				}
 //				Bundle send_data6 = new Bundle();
 //				if(acc == true)
 //					//cal_data.putExtra("Acc", aData);
@@ -198,13 +244,23 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 //					//cal_data.putExtra("Gyro", gData);
 //					send_data6.putFloatArray("Gyro", gData);
 //				cal_data6.putExtras(send_data6);
-				startActivity(cal_data6);
+//				startActivity(cal_data6);
 				break;
 				
 			case R.id.ib_vert:
-				
+	
 				Intent cal_data7 = new Intent(this, SensorConstStop.class);
 				cal_data7.putExtra("orientation", "vert");
+				startActivity(cal_data7);
+				
+//				if(face_up == true) {
+//					Intent cal_data7 = new Intent(this, SensorConstStop.class);
+//					cal_data7.putExtra("orientation", "vert");
+//					startActivity(cal_data7);
+//				} else if(face_flat == true) {
+//					ErrorOrientation();
+//				}
+
 //				Bundle send_data7 = new Bundle();
 //				if(acc == true)
 //					//cal_data.putExtra("Acc", aData);
@@ -213,8 +269,60 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 //					//cal_data.putExtra("Gyro", gData);
 //					send_data7.putFloatArray("Gyro", gData);
 //				cal_data7.putExtras(send_data7);
-				startActivity(cal_data7);
+//				startActivity(cal_data7);
 				break;
 		}
+	}
+	
+	//determine orientation so as to prevent Acc & Dec
+	private void determineOrientation(float[] rotationMatrix) {
+		
+		float[] orientationValues = new float[3];
+		SensorManager.getOrientation(rotationMatrix, orientationValues);
+		
+		double azimuth = Math.toDegrees(orientationValues[0]);
+		double pitch = Math.toDegrees(orientationValues[1]);
+		double roll = Math.toDegrees(orientationValues[2]);
+		
+		if (pitch <= 10) {
+			
+			if (Math.abs(roll) >= 130 && Math.abs(roll) <= 180) {
+				//Log.d("Tilt", "Tilt down" + roll);
+				face_up = true;
+				face_flat = false;
+			} else if (Math.abs(roll) <= 1) {
+				face_flat = true;
+				face_up = false;
+				//Log.d("Face", "face_up : " + Math.abs(roll));
+			} else {
+				face_up = false;
+				face_flat = false;
+			}
+		}
+	}
+
+	//get rotation matrix to earth coordinates
+	private float[] generateRotationMatrix() {
+		float[] rotationMatrix = null;
+		if (aData != null && mData != null) {
+			
+			rotationMatrix = new float[16];
+			
+			boolean rotationMatrixGenerated;
+			rotationMatrixGenerated = SensorManager.getRotationMatrix(
+					rotationMatrix, null, aData, mData);
+			
+			if (!rotationMatrixGenerated) {
+				Log.d("Rotation Matrix", "Failed to generate Rotation Matrix");
+				rotationMatrix = null;
+			}
+		}
+		return rotationMatrix;
+	}
+		
+	//error orientation
+	private void ErrorOrientation() {
+		alert_log = log_dialog.dialog(this, "Error!", "Please choose the other orientation.");
+		alert_log.show();
 	}
 }
