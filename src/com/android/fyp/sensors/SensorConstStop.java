@@ -280,7 +280,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	public void onClick(View view) {
 		
 		log_dialog = new DialogAct_nonSpanned();
-		SimpleDateFormat sdf_grdtruth = new SimpleDateFormat("dd-MM-yy HH-mm");
 		
 		switch(view.getId()) {
 		case R.id.b_start_log:
@@ -319,109 +318,58 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			
 		case R.id.b_left:
 			if(start_log == true && end_log == true) {
-				
-				save_log("LEFT", "GroundTruth");
-				
-//				data_log += time_stamp("time") + "\t" + "LEFT" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time , data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("LEFT", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else 
+				cannotTag();
 			
 			break;
 		case R.id.b_right:
 			if(start_log == true && end_log == true) {
-				save_log("RIGHT", "GroundTruth");
-//				data_log += time_stamp("time") + "\t" + "RIGHT" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time , data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("RIGHT", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else 
+				cannotTag();
 			
 			break;
 		case R.id.b_straight:
 			if(start_log == true && end_log == true) {
-				save_log("STRAIGHT", "GroundTruth");
-//				data_log += time_stamp("time") + "\t" + "STRAIGHT" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("STRAIGHT", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else
+				cannotTag();
 
 			break;
 		case R.id.b_accel:
 			if(start_log == true && end_log == true) {
-				save_log("ACCELERATION", "GroundTruth");
-//				data_log += time_stamp("time") + "\t" + "ACCELERATION" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("ACCELERATION", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else
+				cannotTag();
 
 			break;
 		case R.id.b_decel:
 			if(start_log == true && end_log == true) {
-				save_log("DECELERATION", "GroundTruth");
-//				data_log += time_stamp("time") + "\t" + "DECELERATION" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("DECELERATION", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else
+				cannotTag();
 
 			break;
 		case R.id.b_constant:
 			if(start_log == true && end_log == true) {
-				save_log("CONSTANT", "GroundTruth");	
-//				data_log += time_stamp("time") + "\t" + "CONSTANT" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("CONSTANT", "GroundTruth");	
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else
+				cannotTag();
 
 			break;
 		case R.id.b_stop:
 			if(start_log == true && end_log == true) {
-				save_log("STOP", "GroundTruth");
-//				data_log += time_stamp("time") + "\t" + "STOP" + "\n";
-//				//save timestamp on start log
-//				log_time = sdf_grdtruth.format(new Date());
-//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-//				data_log = "";
+				tag_save_log("STOP", "GroundTruth");
 			}
-			else {
-				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
-				alert_log.show();
-			}
+			else
+				cannotTag();
 
 			break;
 		}
@@ -983,10 +931,15 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 	}
 	
-	private void save_log(String msg, String path) {
+	private void tag_save_log(String msg, String path) {
 		data_log += time_stamp("time") + "\t" + msg + "\n";
 		//save timestamp on start log
 		save_ext.writeExt(curr_time , data_log, path);
 		data_log = "";
+	}
+	
+	private void cannotTag() {
+		alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
+		alert_log.show();
 	}
 }
