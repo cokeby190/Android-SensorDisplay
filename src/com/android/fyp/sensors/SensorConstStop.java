@@ -41,9 +41,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private LinearLayout layout;
 	
+	//ORIENTATION
 	private boolean flat_flag = false;
 	private boolean vert_flag = false;
 
+	//STATE LIST
 	private List<State> q_state = new ArrayList<State>();
 	private List<Long> q_time = new ArrayList<Long>();
 	
@@ -81,11 +83,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//threshold for noise
 	//private float noise_thres = (float) 0.09;
 	//private float gyro_thres = (float) 0.01;
-	//threshold for forward, backward acceleration (acc_x)
-	//higher = less sensitive
-	//lower = more sensitive
-	private float fwd_thres = (float) 0.5;
-	private float back_thres = (float) 0.4;
 	
 	//Gyroscope
 	//to store the integrated angle
@@ -101,7 +98,17 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	double min = 10000000;
 	//minimal vertical distance between two peaks
 	double dist_peaks = 0.05;
-	boolean g_stationary;
+	
+	//THRESHOLDS
+	//5000 = 5secs
+	private final int constant_delay = 5000;
+	//threshold for forward, backward acceleration (acc_x)
+	//higher = less sensitive
+	//lower = more sensitive
+	private final double fwd_thres = 0.5;
+	private final double back_thres = 0.4;
+	//accelerationfast
+	private final double acc_aggr = 2.5;
 	
 	//Location Manager
 	private LocationManager locationMgr; 
@@ -117,7 +124,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private float[] cal_acc = new float[3];
 	private float[] cal_gyro = new float[3];
 	
-	//State Transition
+	//print event
 	private String event_string = "";
 	
 	@Override
@@ -392,6 +399,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				double fwd_acc = 0;
 				float gravity = 0;
 				
+				//change depending on orientation
 				if(flat_flag == true) {
 					//get forward acceleration values - Y AXIS
 					fwd_acc = aData[1];
@@ -407,10 +415,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
 						"resultant :" + check_acceleration +"\n\n");
 
-
+				//time duration for the event
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
+			/**-----------------------------------------------------------------------------------------------------------**
+			 * 	---------------------------------------| STOP/CONSTANT/ACCEL/DECEL FUNCTIONS |-----------------------------*
+			 *//*---------------------------------------------------------------------------------------------------------*/
 				if(check_acceleration <= gravity) {
+					//IF GPS SPEED = 0 >> STOP ----------------------------------------------------------------------------------------//
 					if(gps_speed == 0.0) {
 						if(EventState.checkTransit(State.STOP)) {
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -418,7 +430,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
 						}
-					}
+					} //ELSE IF GPS SPEED > 2 >> CONSTANT - (2mps = 7.2kmph) ---------------------------------------------------------//
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -427,8 +439,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							tv_event.setText(EventState.getState().toString());
 						}
 					}
-				}else if(check_acceleration > gravity) {
+				}
+				else if(check_acceleration > gravity) {
+					//FLAT ORIENTATION
 					if(flat_flag == true) {
+						//DECELERATION (FLAT)----------------------------------------------------------------------------------------//
 						if(fwd_acc <= (back_thres*-1)) {
 							if(EventState.checkTransit(State.DEC)) {
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -436,49 +451,22 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
-								if(acc > 3) {
-									aggressive = " AGGRESSIVE";
-									iv_warn.setVisibility(View.VISIBLE);
-									
-									//log the event to the file
-									if(start_log == true && end_log == true) {
-										//save to SD
-										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
-										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-										
-										drive_log = "";
-									}
-								}
-								else 
-									iv_warn.setVisibility(View.INVISIBLE);
+								acc_aggressive(fwd_acc); 
 							}
-						} else if(fwd_acc >= fwd_thres) {
+						} //ACCELERATION (FLAT) ----------------------------------------------------------------------------------------//
+						else if(fwd_acc >= fwd_thres) {
 							if(EventState.checkTransit(State.ACC)) {
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.ACC, "ACCELERATE");
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
-								if(acc > 3) {
-									aggressive = " AGGRESSIVE";
-									iv_warn.setVisibility(View.VISIBLE);
-									
-									//log the event to the file
-									if(start_log == true && end_log == true) {
-										//save to SD
-										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
-										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-										
-										drive_log = "";
-									}
-								}
-								else 
-									iv_warn.setVisibility(View.INVISIBLE);
+								acc_aggressive(fwd_acc);
 							}
 						}
-					} else if(vert_flag == true) {
+					} //VERTICAL ORIENTATION ----------------------------------------------------------------------------------------//
+					else if(vert_flag == true) {
+						//DECELERATION (VERT)----------------------------------------------------------------------------------------//
 						if(fwd_acc >= fwd_thres) {
 							if(EventState.checkTransit(State.DEC)) {
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -486,46 +474,17 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 								EventState.setCurrent(State.DEC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 
-								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
-								if(acc > 3) {
-									aggressive = " AGGRESSIVE";
-									iv_warn.setVisibility(View.VISIBLE);
-									
-									//log the event to the file
-									if(start_log == true && end_log == true) {
-										//save to SD
-										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
-										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-										
-										drive_log = "";
-									}
-								}
-								else 
-									iv_warn.setVisibility(View.INVISIBLE);
+								acc_aggressive(fwd_acc);
 							}
-						} else if(fwd_acc <= (back_thres*-1)) {
+						} 	//ACCELERATION (VERT)----------------------------------------------------------------------------------------// 
+						else if(fwd_acc <= (back_thres*-1)) {
 							if(EventState.checkTransit(State.ACC)) {
 								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 								processStateList(State.ACC, "ACCELERATE");
 								EventState.setCurrent(State.ACC, System.currentTimeMillis());
 								tv_event.setText(EventState.getState().toString());
 								
-								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
-								if(acc > 3) {
-									aggressive = " AGGRESSIVE";
-									iv_warn.setVisibility(View.VISIBLE);
-									
-									//log the event to the file
-									if(start_log == true && end_log == true) {
-										//save to SD
-										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
-										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-										
-										drive_log = "";
-									}
-								}
-								else 
-									iv_warn.setVisibility(View.INVISIBLE);
+								acc_aggressive(fwd_acc);
 							}
 						}
 					}
@@ -792,7 +751,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		layout.addView(graphView);
 	}
 	
+	//add state to state list
 	private void processStateList(State state, String msg) {
+		//IF STATELIST IS EMPTY -------------------------------------------------------------------------------------------------//
 		if(q_state.isEmpty()) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
@@ -802,7 +763,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				//save to SD
 				data_save += time_stamp("time") + "\t" + msg;
 			}
-		}
+		} //IF STATELIST IS NOT EMPTY AND LAST ELEMENT IN LIST != CURRENT STATE (PREVENT DUPLICATES) ----------------------------//
 		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
@@ -815,25 +776,30 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 	}
 	
+	//ADD TIME FOR THE STATE
 	private void processStateTime(long time) {
 		
+		//converting millisec to sec
 		double convert = time/1000.0;
 		String aggressive = "";
 		
+		//IF TIME LIST IS EMPTY, AND STATELIST IS 1------------------------------------------------------------------------------//
 		if(q_time.isEmpty() && q_state.size() == 1) {
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
 				
-				//log the event to the file
-				if(start_log == true && end_log == true) {
-					//save to SD
-					drive_log += time_stamp("time") + "\t" + q_state.get(0) + "\t" + convert + "\n";
-					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-					
-					drive_log = "";
-				}
+//				//log the event to the file
+//				if(start_log == true && end_log == true) {
+//					//save to SD
+//					drive_log += time_stamp("time") + "\t" + q_state.get(0) + "\t" + convert + "\n";
+//					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+//					
+//					drive_log = "";
+//				}
+				
+				aggr_save_log(q_state.get(0) + "\t" + convert);
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
@@ -847,21 +813,23 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				
 				data_save = "";
 			}
-		}
+		} //IF TIME LIST IS NOT EMPTY, AND LIST SIZE IS 1 LESSER THAN STATELIST-------------------------------------------------//
 		else if(!q_time.isEmpty() && q_time.size() == q_state.size()-1) {
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
 				
-				//log the event to the file
-				if(start_log == true && end_log == true) {
-					//save to SD
-					drive_log += time_stamp("time") + "\t" + q_state.get(q_state.size()-1) + "\t" + convert + "\n";
-					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
-					
-					drive_log = "";
-				}
+//				//log the event to the file
+//				if(start_log == true && end_log == true) {
+//					//save to SD
+//					drive_log += time_stamp("time") + "\t" + q_state.get(q_state.size()-1) + "\t" + convert + "\n";
+//					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+//					
+//					drive_log = "";
+//				}
+//				
+				aggr_save_log(q_state.get(q_state.size()-1) + "\t" + convert);
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
@@ -877,7 +845,32 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			}
 		}
 	}
+
+	//IF ACCELERATION IS AGGRESSIVE
+	private void acc_aggressive(double fwd_acc) {
+		double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+		if(acc > acc_aggr) {
+			iv_warn.setVisibility(View.VISIBLE);
+			
+			aggr_save_log(EventState.getState().toString());
+		}
+		else 
+			iv_warn.setVisibility(View.INVISIBLE);
+	}
 	
+	//saving aggressive events
+	private void aggr_save_log(String msg) {
+		//log the event to the file
+		if(start_log == true && end_log == true) {
+			//save to SD
+			drive_log += time_stamp("time") + "\t" + msg + "\n";
+			save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+			
+			drive_log = "";
+		}
+	}
+	
+	//tag save log
 	private void tag_save_log(String msg, String path) {
 		data_log += time_stamp("time") + "\t" + msg + "\n";
 		//save timestamp on start log
@@ -885,6 +878,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		data_log = "";
 	}
 	
+	//error when cannot tag
 	private void cannotTag() {
 		alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
 		alert_log.show();
