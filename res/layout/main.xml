@@ -60,96 +60,32 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_vertical"
             android:text="Caliberate Device Const Stop" />
-
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="invisible" >
+        android:layout_gravity="center_horizontal" >
 
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
-
-            <CheckBox
-                android:id="@+id/checkBox1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Acc X" />
-
-            <CheckBox
-                android:id="@+id/checkBox3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Acc Y" />
-
-            <CheckBox
-                android:id="@+id/checkBox2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Acc Z" />
-
-            <CheckBox
-                android:id="@+id/checkBox4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gyro X" />
-
-            <CheckBox
-                android:id="@+id/checkBox5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gyro Y" />
-
-            <CheckBox
-                android:id="@+id/checkBox6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gyro Z" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <ImageButton
+            android:id="@+id/ib_flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_margin="5dp"
+            android:background="@drawable/white_button"
+            android:minHeight="150dp"
+            android:minWidth="120dp"
+            android:src="@drawable/android_flat_100" />
 
-            <CheckBox
-                android:id="@+id/CheckBox06"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Orient X" />
-
-            <CheckBox
-                android:id="@+id/CheckBox04"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Orient Y" />
-
-            <CheckBox
-                android:id="@+id/CheckBox05"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Orient Z" />
-
-            <CheckBox
-                android:id="@+id/CheckBox03"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mag X" />
-
-            <CheckBox
-                android:id="@+id/CheckBox02"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mag Y" />
-
-            <CheckBox
-                android:id="@+id/CheckBox01"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mag Z" />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/ib_vert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/white_button"
+            android:minHeight="150dp"
+            android:minWidth="120dp"
+            android:src="@drawable/android_vert_100_w" />
 
     </LinearLayout>
 

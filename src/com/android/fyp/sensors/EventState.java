@@ -52,10 +52,8 @@ public class EventState {
 	}
 	
 	public static void setCurrent(State current, long curr_time) {
-		
 		currentState = current;
 		start_ts = curr_time;
-		
 	}
 	
 	public static void setDir(State direction, long curr_time) {

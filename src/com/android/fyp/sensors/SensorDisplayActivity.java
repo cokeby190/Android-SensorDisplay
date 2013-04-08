@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 
 /**
  * The Activity Displays Sensor Data to the User, including showing a dialog with additional 
@@ -32,6 +34,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 	//UI Elements
 	private Button b_caliberate, b_caliberate2, b_caliberate3, 
 		b_caliberate4, b_caliberate5;
+	private ImageButton b_orient_flat, b_orient_vert;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,11 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
         b_caliberate4.setOnClickListener(this);
         b_caliberate5 = (Button) findViewById(R.id.b_caliberate5);
         b_caliberate5.setOnClickListener(this);
+        
+        b_orient_flat = (ImageButton) findViewById(R.id.ib_flat);
+        b_orient_flat.setOnClickListener(this);
+        b_orient_vert = (ImageButton) findViewById(R.id.ib_vert);
+        b_orient_vert.setOnClickListener(this);
         
         //Sensor Listener Object 
         mSensorListener = new SensorEventListener() {
@@ -176,6 +184,34 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 					send_data5.putFloatArray("Gyro", gData);
 				cal_data5.putExtras(send_data5);
 				startActivity(cal_data5);
+				break;
+			
+			case R.id.ib_flat:
+				
+				Intent cal_data6 = new Intent(this, SensorConstStop.class);
+				Bundle send_data6 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data6.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data6.putFloatArray("Gyro", gData);
+				cal_data6.putExtras(send_data6);
+				startActivity(cal_data6);
+				break;
+				
+			case R.id.ib_vert:
+				
+				Intent cal_data7 = new Intent(this, SensorConstStopVert.class);
+				Bundle send_data7 = new Bundle();
+				if(acc == true)
+					//cal_data.putExtra("Acc", aData);
+					send_data7.putFloatArray("Acc", aData);
+				if(gyro == true)
+					//cal_data.putExtra("Gyro", gData);
+					send_data7.putFloatArray("Gyro", gData);
+				cal_data7.putExtras(send_data7);
+				startActivity(cal_data7);
 				break;
 		}
 	}

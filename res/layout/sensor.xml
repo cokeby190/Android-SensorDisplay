@@ -9,112 +9,132 @@
 	    android:layout_height="match_parent"
 	    android:orientation="vertical" >
 
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+		<LinearLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical" >
 
-	        <Button
-	            android:id="@+id/b_start_log"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/red_button"
-	            android:text="Start Log" />
+		    <LinearLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content" >
 
-	        <Button
-	            android:id="@+id/b_end_log"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/red_button"
-	            android:text="End Log" />
-	    </LinearLayout>
+		        <Button
+		            android:id="@+id/b_start_log"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/red_button"
+		            android:text="Start Log" />
 
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+		        <Button
+		            android:id="@+id/b_end_log"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/red_button"
+		            android:text="End Log" />
+		    </LinearLayout>
 
-	        <Button
-	            android:id="@+id/b_left"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/blue_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="LEFT" />
+		    <LinearLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content" >
 
-	        <Button
-	            android:id="@+id/b_right"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/blue_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="RIGHT" />
-	    </LinearLayout>
+		        <Button
+		            android:id="@+id/b_left"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/blue_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="LEFT" />
 
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+		        <Button
+		            android:id="@+id/b_right"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/blue_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="RIGHT" />
+		    </LinearLayout>
 
-	        <Button
-	            android:id="@+id/b_accel"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/green_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="ACC" />
+		    <LinearLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content" >
 
-	        <Button
-	            android:id="@+id/b_decel"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/green_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="DEC" />
-	    </LinearLayout>
+		        <Button
+		            android:id="@+id/b_accel"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/green_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="ACC" />
 
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+		        <Button
+		            android:id="@+id/b_decel"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/green_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="DEC" />
+		    </LinearLayout>
 
-	        <Button
-	            android:id="@+id/b_constant"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/green_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="CONSTANT" />
-	    </LinearLayout>
+		    <LinearLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content" >
 
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+		        <Button
+		            android:id="@+id/b_constant"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/green_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="CONSTANT" />
+		    </LinearLayout>
 
-	        <Button
-	            android:id="@+id/b_stop"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_margin="10dp"
-	            android:background="@drawable/red_button"
-	            android:minHeight="88dp"
-	            android:minWidth="88dp"
-	            android:text="STOP" />
-	    </LinearLayout>
+		    <LinearLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content" >
+
+		        <Button
+		            android:id="@+id/b_stop"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_margin="10dp"
+		            android:background="@drawable/red_button"
+		            android:minHeight="88dp"
+		            android:minWidth="88dp"
+		            android:text="STOP" />
+		    </LinearLayout>
+
+		</LinearLayout>
+
+		<ImageView
+		    android:id="@+id/imageView1"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center_horizontal"
+		    android:layout_margin="10dp"
+		    android:src="@drawable/android_warning" />
+
+		<LinearLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content" >
+		</LinearLayout>
 
 	    <TextView
 	        android:id="@+id/tv_event"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_margin="30dp"
+	        android:layout_margin="20dp"
 	        android:text="STOP"
 	        android:textAppearance="?android:attr/textAppearanceLarge"
 	        android:textSize="120sp" />

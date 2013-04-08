@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+public class SensorConstStopVert extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
@@ -433,7 +433,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				aData = event.values.clone();
 				
 				//get forward acceleration values - Y AXIS
-				double fwd_acc = aData[1];
+				double fwd_acc = aData[2];
 				
 				rotationMatrix = generateRotationMatrix();
 			
@@ -475,7 +475,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
-				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
+				if(check_acceleration <= sensorMgr.GRAVITY_EARTH + 0.4) {
 					if(gps_speed == 0.0) {
 					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
@@ -499,11 +499,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							//event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
+				}else if(check_acceleration > (sensorMgr.GRAVITY_EARTH + 0.4)) {
 //					Log.d("ACC", "acc : " + check_acceleration);
 //					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
 //					Log.d("fwd_acc", "fwd : " + fwd_acc);
-					if(fwd_acc <= (back_thres*-1)) {
+					if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.DEC)) {
 //							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -512,7 +512,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							tv_event.setText(EventState.getState().toString());
 							//event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
-					} else if(fwd_acc >= fwd_thres) {
+					} else if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.ACC)) {
 //							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -946,5 +946,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				iv_warn.setVisibility(View.INVISIBLE);
 			event_string += "\nTime : " + convert + aggressive + "\n";
 		}
+	}
+	
+	private void checktime() {
+		
 	}
 }
