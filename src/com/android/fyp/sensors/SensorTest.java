@@ -592,14 +592,14 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 					integrateGyro(event.timestamp, timestamp, "z", gData[2], dT);
 					if((angle_z - prev_z) > 1.0) {
 						if(EventState.checkDir(State.LEFT)) {
-							EventState.setDir(State.LEFT);
+							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
 							event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
 						if(EventState.checkDir(State.RIGHT)) {
-							EventState.setDir(State.RIGHT);
+							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
 							event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
@@ -608,7 +608,7 @@ public class SensorTest extends Activity implements OnClickListener, SensorEvent
 					max = gData[2];
 					prev_z = angle_z;
 				} else {
-					EventState.setDir(State.STRAIGHT);
+					EventState.setDir_str(State.STRAIGHT);
 //					if(stop) {
 //						tv_event.setText(EventState.getState().toString());
 //						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";

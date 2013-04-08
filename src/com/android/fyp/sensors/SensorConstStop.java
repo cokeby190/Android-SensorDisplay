@@ -477,6 +477,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
 //							stop = true;
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.STOP, "STOPPPPPPP");
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
@@ -488,6 +489,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
 //							stop = false;
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.CONST, "CONSTANT SPEED");
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
@@ -501,6 +503,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.DEC)) {
 //							stop = false;
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.DEC, "DECELERATE");
 							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
@@ -509,6 +512,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					} else if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.ACC)) {
 //							stop = false;
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.ACC, "ACCELERATE");
 							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
@@ -601,16 +605,18 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					integrateGyro(event.timestamp, timestamp, "z", gData[2], dT);
 					if((angle_z - prev_z) > 1.0) {
 						if(EventState.checkDir(State.LEFT)) {
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.LEFT, "LEFT");
-							EventState.setDir(State.LEFT);
+							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
 							//event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
 						if(EventState.checkDir(State.RIGHT)) {
+							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.RIGHT, "RIGHT");
-							EventState.setDir(State.RIGHT);
+							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
 							//event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
@@ -619,7 +625,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					max = gData[2];
 					prev_z = angle_z;
 				} else {
-					EventState.setDir(State.STRAIGHT);
+					EventState.setDir_str(State.STRAIGHT);
 //					if(stop) {
 //						tv_event.setText(EventState.getState().toString());
 //						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
@@ -910,7 +916,19 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
 		}
+	}
+	
+	private void processStateTime(long time) {
 		
-		//tv_show_events.setText(event_string);
+		double convert = time/1000.0;
+		
+		if(q_time.isEmpty() && q_state.size() == 1) {
+			q_time.add(time);
+			event_string += "\nTime : " + convert + "\n";
+		}
+		else if(!q_time.isEmpty() && q_time.size() == q_state.size()-1) {
+			q_time.add(time);
+			event_string += "\nTime : " + convert + "\n";
+		}
 	}
 }

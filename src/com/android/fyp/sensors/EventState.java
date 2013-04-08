@@ -12,7 +12,7 @@ public class EventState {
 	private static HashMap stateMap;
 	private static HashMap dirMap;
 	
-	private static long start_ts;
+	private static long start_ts = 0;
 	//private Time stop_ts;
 	
 	static {
@@ -31,6 +31,8 @@ public class EventState {
 		
 		currentState = State.STOP;
 		currentDir = State.STRAIGHT;
+		
+		start_ts = System.currentTimeMillis();
 	}
 		
 	public static boolean checkTransit(State expected) {
@@ -56,7 +58,12 @@ public class EventState {
 		
 	}
 	
-	public static void setDir(State direction) {
+	public static void setDir(State direction, long curr_time) {
+		currentDir = direction;
+		start_ts = curr_time;
+	}
+	
+	public static void setDir_str(State direction) {
 		currentDir = direction;
 	}
 	
