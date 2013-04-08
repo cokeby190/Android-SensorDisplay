@@ -66,7 +66,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private String data_log = "";
 	private String drive_log = "";
 	private String curr_time;
-	private String log_time;
 	private boolean start_log = false;
 	private boolean end_log = false;
 	
@@ -78,10 +77,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private float[] mData = new float[3];
 	
 	//Accelerometer
-	private int count = 0;
+	//private int count = 0;
 	//threshold for noise
 	//private float noise_thres = (float) 0.09;
-	private float gyro_thres = (float) 0.01;
+	//private float gyro_thres = (float) 0.01;
 	//threshold for forward, backward acceleration (acc_x)
 	//higher = less sensitive
 	//lower = more sensitive
@@ -189,13 +188,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
     	b_decel.setOnClickListener(this);
     	b_constant.setOnClickListener(this);
     	b_stop.setOnClickListener(this);
-		
+    	
 	}
 
 	/**
 	 * Function getting caliberation data from Main Activity
 	 */
 	private void getData() {
+		//TODO :
 		
 //		Bundle getdata = getIntent().getExtras();
 //    	if(getdata.getFloatArray("Acc") != null) {
@@ -531,59 +531,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					}
 					
 				}
-				
-//				//get forward acceleration values - Y AXIS
-//				double fwd_acc = aData[1];
-//				
-//				//--------------------------------- STOP / CONSTANT STATE ----------------------------------------//
-//				if((aData[1] > 0 && aData[1] <= aData_calib[1]+noise_thres) || (aData[1] >1 && aData[1] >= aData_calib[1]-noise_thres) ) {
-//					//if(prev_state != State.STOP)
-//					//if(gps_speed == 0.0 || g_stationary == true) {
-//					//if(g_stationary == true) {
-//					if(gps_speed == 0.0) {
-//						if(EventState.checkTransit(State.STOP)) {
-//							stop = true;
-//							EventState.setCurrent(State.STOP);
-//							tv_event.setText(EventState.getState().toString());
-//							event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-//						}
-//					}
-//					else if(gps_speed >= 2.0) {
-//						if(EventState.checkTransit(State.CONST)) {
-//							stop = false;
-//							EventState.setCurrent(State.CONST);
-//							tv_event.setText(EventState.getState().toString());
-//							event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
-//						}
-//					}
-//				}
-//				
-//				if(fwd_acc <= (back_thres*-1)) {
-////					if(g_stationary == false) {
-//
-////					if(!tilt_up && !tilt_down) {
-////						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
-//						if(EventState.checkTransit(State.DEC)) {
-//							stop = false;
-//							EventState.setCurrent(State.DEC);
-//							tv_event.setText(EventState.getState().toString());
-//							event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
-//						}
-////					}
-//				}
-//				else if(fwd_acc >= fwd_thres) {
-////					if(g_stationary == false) {
-//
-////					if(!tilt_up && !tilt_down) {
-////						Log.d("ACC", "TILT UP : " + tilt_up + " tilt_down : " + tilt_down);
-//						if(EventState.checkTransit(State.ACC)) {
-//							stop = false;
-//							EventState.setCurrent(State.ACC);
-//							tv_event.setText(EventState.getState().toString());
-//							event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
-//						}
-////					}
-//				}
 				
 				break;
 				
