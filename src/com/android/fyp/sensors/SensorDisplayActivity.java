@@ -189,28 +189,30 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 			case R.id.ib_flat:
 				
 				Intent cal_data6 = new Intent(this, SensorConstStop.class);
-				Bundle send_data6 = new Bundle();
-				if(acc == true)
-					//cal_data.putExtra("Acc", aData);
-					send_data6.putFloatArray("Acc", aData);
-				if(gyro == true)
-					//cal_data.putExtra("Gyro", gData);
-					send_data6.putFloatArray("Gyro", gData);
-				cal_data6.putExtras(send_data6);
+				cal_data6.putExtra("orientation", "flat");
+//				Bundle send_data6 = new Bundle();
+//				if(acc == true)
+//					//cal_data.putExtra("Acc", aData);
+//					send_data6.putFloatArray("Acc", aData);
+//				if(gyro == true)
+//					//cal_data.putExtra("Gyro", gData);
+//					send_data6.putFloatArray("Gyro", gData);
+//				cal_data6.putExtras(send_data6);
 				startActivity(cal_data6);
 				break;
 				
 			case R.id.ib_vert:
 				
-				Intent cal_data7 = new Intent(this, SensorConstStopVert.class);
-				Bundle send_data7 = new Bundle();
-				if(acc == true)
-					//cal_data.putExtra("Acc", aData);
-					send_data7.putFloatArray("Acc", aData);
-				if(gyro == true)
-					//cal_data.putExtra("Gyro", gData);
-					send_data7.putFloatArray("Gyro", gData);
-				cal_data7.putExtras(send_data7);
+				Intent cal_data7 = new Intent(this, SensorConstStop.class);
+				cal_data7.putExtra("orientation", "vert");
+//				Bundle send_data7 = new Bundle();
+//				if(acc == true)
+//					//cal_data.putExtra("Acc", aData);
+//					send_data7.putFloatArray("Acc", aData);
+//				if(gyro == true)
+//					//cal_data.putExtra("Gyro", gData);
+//					send_data7.putFloatArray("Gyro", gData);
+//				cal_data7.putExtras(send_data7);
 				startActivity(cal_data7);
 				break;
 		}

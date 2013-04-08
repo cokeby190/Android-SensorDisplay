@@ -66,6 +66,7 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 	private SaveExt save_ext;
 	private String data_save = "";
 	private String data_log = "";
+	private String drive_log = "";
 	private String curr_time;
 	private String log_time;
 	private boolean start_log = false;
@@ -425,6 +426,7 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 		float[] rotationMatrix;
 		boolean stationary = true; 
 		long diff_const;
+		String aggressive = "";
 		
 		switch(event.sensor.getType()) {
 		
@@ -442,84 +444,78 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 					determineOrientation(rotationMatrix);
 				}
 				
-//				if(cal_acc != null) {
-//					aData[0] = aData[0] - cal_acc[0];
-//					aData[1] = aData[1] - cal_acc[1];
-//					aData[2] = aData[2] - cal_acc[2];
-//					
-//					if(count == 0) {
-//						aData_calib[0] = aData[0];
-//						aData_calib[1] = aData[1];
-//						aData_calib[2] = aData[2];
-//					}
-//						
-//					count++;
-//					
-//				}else {
-//					aData_calib = event.values.clone();
-//				}
-				
-				
 				double check_acceleration = Math.sqrt(aData[1]*aData[1] + aData[2]*aData[2]);
-//				Log.d("ACC", "acc : " + check_acceleration);
-//				Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-				
-//				double abs_acceleration = Math.sqrt(aData[0]*aData[0] + aData[1]*aData[1] + aData[2]*aData[2]);
-				
-//				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
-//						"resultant :" + check_acceleration +"\n" + "abs_acc : " + abs_acceleration + "\n\n");
 				
 				tv_acc.setText("\nACCELEROMETER: \n\nx-axis: " + aData[0] + " (m/s^2) \ny-axis: " + aData[1] + " (m/s^2) \nz-axis: " + aData[2] + " (m/s^2) \n" +
 						"resultant :" + check_acceleration +"\n\n");
-
 
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
 				if(check_acceleration <= sensorMgr.GRAVITY_EARTH + 0.4) {
 					if(gps_speed == 0.0) {
-					//if(abs_acceleration <= sensorMgr.GRAVITY_EARTH) {
 						if(EventState.checkTransit(State.STOP)) {
-//							stop = true;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.STOP, "STOPPPPPPP");
 							EventState.setCurrent(State.STOP, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
-					//else if(gps_speed >= 2.0 && diff_const > 5000) {	//5 seconds
-					//else if(abs_acceleration > sensorMgr.GRAVITY_EARTH && diff_const > 5000) {
 					else if(gps_speed >= 2.0 && diff_const > 5000) {
 						if(EventState.checkTransit(State.CONST)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.CONST, "CONSTANT SPEED");
 							EventState.setCurrent(State.CONST, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nCONSTANT SPEED" + ", curr_state : " + EventState.getState().toString() + "\n";
 						}
 					}
 				}else if(check_acceleration > (sensorMgr.GRAVITY_EARTH + 0.4)) {
-//					Log.d("ACC", "acc : " + check_acceleration);
-//					Log.d("gravity", "g : " + sensorMgr.GRAVITY_EARTH);
-//					Log.d("fwd_acc", "fwd : " + fwd_acc);
 					if(fwd_acc >= fwd_thres) {
 						if(EventState.checkTransit(State.DEC)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.DEC, "DECELERATE");
 							EventState.setCurrent(State.DEC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nDECELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+
+							double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+							if(acc > 3) {
+								aggressive = " AGGRESSIVE";
+								iv_warn.setVisibility(View.VISIBLE);
+								
+								//log the event to the file
+								if(start_log == true && end_log == true) {
+									//save to SD
+									drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+									save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+									
+									drive_log = "";
+								}
+							}
+							else 
+								iv_warn.setVisibility(View.INVISIBLE);
 						}
 					} else if(fwd_acc <= (back_thres*-1)) {
 						if(EventState.checkTransit(State.ACC)) {
-//							stop = false;
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.ACC, "ACCELERATE");
 							EventState.setCurrent(State.ACC, System.currentTimeMillis());
 							tv_event.setText(EventState.getState().toString());
-							//event_string += "\nACCELERATE" + ", curr_state : " + EventState.getState().toString() + "\n";
+							
+							double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+							if(acc > 3) {
+								aggressive = " AGGRESSIVE";
+								iv_warn.setVisibility(View.VISIBLE);
+								
+								//log the event to the file
+								if(start_log == true && end_log == true) {
+									//save to SD
+									drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+									save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+									
+									drive_log = "";
+								}
+							}
+							else 
+								iv_warn.setVisibility(View.INVISIBLE);
 						}
 					}
 				}
@@ -612,7 +608,6 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 							processStateList(State.LEFT, "LEFT");
 							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							//event_string += "\nLEFT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
@@ -621,7 +616,6 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 							processStateList(State.RIGHT, "RIGHT");
 							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							//event_string += "\nRIGHT" + ", curr_state : " + EventState.getDir().toString() + "\n";
 						}
 					}
 					
@@ -629,10 +623,6 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 					prev_z = angle_z;
 				} else {
 					EventState.setDir_str(State.STRAIGHT);
-//					if(stop) {
-//						tv_event.setText(EventState.getState().toString());
-//						//event_string += "\nSTOPPPPPP" + ", curr_state : " + EventState.getState().toString() + "\n";
-//					}
 				}
 				
 				break;
@@ -647,18 +637,9 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 					determineOrientation(rotationMatrix);
 				}
 				break;
-				
 		}
 		
 		tv_show_events.setText(event_string);
-//		if(q_state != null && !q_state.isEmpty() && q_time != null && !q_time.isEmpty()) {
-//			Toast.makeText(this, "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1), Toast.LENGTH_SHORT);
-//			Log.d("TIME", "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1));
-//		}
-//		tv_event.setText(EventState.getState().toString());
-//		event_string += "State : " + EventState.getState().toString();
-//		tv_show_events.setText(event_string);
-		
 	}
 	
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -914,10 +895,22 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 		if(q_state.isEmpty()) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += time_stamp("time") + "\t" + msg;
+			}
 		}
 		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state) {
 			q_state.add(state);
 			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += time_stamp("time") + "\t" + msg;
+			}
 		}
 	}
 	
@@ -931,20 +924,56 @@ public class SensorConstStopVert extends Activity implements OnClickListener, Se
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
+				
+				//log the event to the file
+				if(start_log == true && end_log == true) {
+					//save to SD
+					drive_log += time_stamp("time") + "\t" + q_state.get(0) + "\t" + convert + "\n";
+					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+					
+					drive_log = "";
+				}
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
 			event_string += "\nTime : " + convert + aggressive + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += "\t" + convert + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
 		else if(!q_time.isEmpty() && q_time.size() == q_state.size()-1) {
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
+				
+				//log the event to the file
+				if(start_log == true && end_log == true) {
+					//save to SD
+					drive_log += time_stamp("time") + "\t" + q_state.get(q_state.size()-1) + "\t" + convert + "\n";
+					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+					
+					drive_log = "";
+				}
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
 			event_string += "\nTime : " + convert + aggressive + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += "\t" + convert + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
 	}
 }

@@ -67,26 +67,55 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" >
 
-        <ImageButton
-            android:id="@+id/ib_flat"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/white_button"
-            android:minHeight="150dp"
-            android:minWidth="120dp"
-            android:src="@drawable/android_flat_100" />
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
-        <ImageButton
-            android:id="@+id/ib_vert"
+            <ImageButton
+                android:id="@+id/ib_flat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/white_button"
+                android:minHeight="150dp"
+                android:minWidth="120dp"
+                android:src="@drawable/android_flat_100" />
+
+            <TextView
+                android:id="@+id/tv2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="10dp"
+                android:text="FLAT" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/white_button"
-            android:minHeight="150dp"
-            android:minWidth="120dp"
-            android:src="@drawable/android_vert_100_w" />
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
+            <ImageButton
+                android:id="@+id/ib_vert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/white_button"
+                android:minHeight="150dp"
+                android:minWidth="120dp"
+                android:src="@drawable/android_vert_100_w" />
+
+            <TextView
+                android:id="@+id/tv3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="10dp"
+                android:text="VERTICAL" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

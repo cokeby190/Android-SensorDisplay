@@ -15,6 +15,7 @@ import com.jjoe64.graphview.GraphViewSeries.GraphViewStyle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -39,6 +40,9 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
 	private LinearLayout layout;
+	
+	private boolean flat_flag = false;
+	private boolean vert_flag = false;
 
 	private List<State> q_state = new ArrayList<State>();
 	private List<Long> q_time = new ArrayList<Long>();
@@ -60,6 +64,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private SaveExt save_ext;
 	private String data_save = "";
 	private String data_log = "";
+	private String drive_log = "";
 	private String curr_time;
 	private String log_time;
 	private boolean start_log = false;
@@ -192,16 +197,23 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	 */
 	private void getData() {
 		
-		Bundle getdata = getIntent().getExtras();
-    	if(getdata.getFloatArray("Acc") != null) {
-    		cal_acc = getdata.getFloatArray("Acc");
-    		Log.d("ACC_X", cal_acc[0] + "");
-    		Log.d("ACC_Y", cal_acc[1] + "");
-    		Log.d("ACC_Z", cal_acc[2] + "");
-    	}
-    	if(getdata.getFloatArray("Gyro") != null) {
-    		cal_gyro = getdata.getFloatArray("Gyro");
-    	}
+//		Bundle getdata = getIntent().getExtras();
+//    	if(getdata.getFloatArray("Acc") != null) {
+//    		cal_acc = getdata.getFloatArray("Acc");
+//    		Log.d("ACC_X", cal_acc[0] + "");
+//    		Log.d("ACC_Y", cal_acc[1] + "");
+//    		Log.d("ACC_Z", cal_acc[2] + "");
+//    	}
+//    	if(getdata.getFloatArray("Gyro") != null) {
+//    		cal_gyro = getdata.getFloatArray("Gyro");
+//    	}
+		
+		Intent intent = getIntent();
+		String orientation = intent.getStringExtra("orientation");
+		if(orientation.equals("flat"))
+			flat_flag = true;
+		else if(orientation.equals("vert"))
+			vert_flag = true;
 		
 	}
 
@@ -307,11 +319,14 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			
 		case R.id.b_left:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "LEFT" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time , data_log, "GroundTruth");
-				data_log = "";
+				
+				save_log("LEFT", "GroundTruth");
+				
+//				data_log += time_stamp("time") + "\t" + "LEFT" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time , data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -321,11 +336,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_right:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "RIGHT" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time , data_log, "GroundTruth");
-				data_log = "";
+				save_log("RIGHT", "GroundTruth");
+//				data_log += time_stamp("time") + "\t" + "RIGHT" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time , data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -335,11 +351,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_straight:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "STRAIGHT" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-				data_log = "";
+				save_log("STRAIGHT", "GroundTruth");
+//				data_log += time_stamp("time") + "\t" + "STRAIGHT" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -349,11 +366,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_accel:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "ACCELERATION" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-				data_log = "";
+				save_log("ACCELERATION", "GroundTruth");
+//				data_log += time_stamp("time") + "\t" + "ACCELERATION" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -363,11 +381,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_decel:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "DECELERATION" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-				data_log = "";
+				save_log("DECELERATION", "GroundTruth");
+//				data_log += time_stamp("time") + "\t" + "DECELERATION" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -377,11 +396,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_constant:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "CONSTANT" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-				data_log = "";
+				save_log("CONSTANT", "GroundTruth");	
+//				data_log += time_stamp("time") + "\t" + "CONSTANT" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -391,11 +411,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			break;
 		case R.id.b_stop:
 			if(start_log == true && end_log == true) {
-				data_log += time_stamp("time") + "\t" + "STOP" + "\n";
-				//save timestamp on start log
-				log_time = sdf_grdtruth.format(new Date());
-				save_ext.writeExt(curr_time, data_log, "GroundTruth");
-				data_log = "";
+				save_log("STOP", "GroundTruth");
+//				data_log += time_stamp("time") + "\t" + "STOP" + "\n";
+//				//save timestamp on start log
+//				log_time = sdf_grdtruth.format(new Date());
+//				save_ext.writeExt(curr_time, data_log, "GroundTruth");
+//				data_log = "";
 			}
 			else {
 				alert_log = log_dialog.dialog(this, "Error!", "Log has not started, cannot TAG.");
@@ -412,6 +433,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	public void onSensorChanged(SensorEvent event) {
 		
 		long diff_const;
+		String aggressive = "";
 		
 		switch(event.sensor.getType()) {
 		
@@ -419,8 +441,18 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				
 				aData = event.values.clone();
 				
-				//get forward acceleration values - Y AXIS
-				double fwd_acc = aData[1];				
+				double fwd_acc = 0;
+				float gravity = 0;
+				
+				if(flat_flag == true) {
+					//get forward acceleration values - Y AXIS
+					fwd_acc = aData[1];
+					gravity = sensorMgr.GRAVITY_EARTH;
+				}
+				else if(vert_flag == true) {
+					fwd_acc = aData[2];
+					gravity = (float) (sensorMgr.GRAVITY_EARTH + 0.4);
+				}
 
 				double check_acceleration = Math.sqrt(aData[1]*aData[1] + aData[2]*aData[2]);
 				
@@ -430,7 +462,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 
 				diff_const = System.currentTimeMillis() - EventState.getStartTs();
 				
-				if(check_acceleration <= sensorMgr.GRAVITY_EARTH) {
+				if(check_acceleration <= gravity) {
 					if(gps_speed == 0.0) {
 						if(EventState.checkTransit(State.STOP)) {
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
@@ -447,22 +479,109 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							tv_event.setText(EventState.getState().toString());
 						}
 					}
-				}else if(check_acceleration > sensorMgr.GRAVITY_EARTH) {
-					if(fwd_acc <= (back_thres*-1)) {
-						if(EventState.checkTransit(State.DEC)) {
-							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
-							processStateList(State.DEC, "DECELERATE");
-							EventState.setCurrent(State.DEC, System.currentTimeMillis());
-							tv_event.setText(EventState.getState().toString());
+				}else if(check_acceleration > gravity) {
+					if(flat_flag == true) {
+						if(fwd_acc <= (back_thres*-1)) {
+							if(EventState.checkTransit(State.DEC)) {
+								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
+								processStateList(State.DEC, "DECELERATE");
+								EventState.setCurrent(State.DEC, System.currentTimeMillis());
+								tv_event.setText(EventState.getState().toString());
+								
+								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+								if(acc > 3) {
+									aggressive = " AGGRESSIVE";
+									iv_warn.setVisibility(View.VISIBLE);
+									
+									//log the event to the file
+									if(start_log == true && end_log == true) {
+										//save to SD
+										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+										
+										drive_log = "";
+									}
+								}
+								else 
+									iv_warn.setVisibility(View.INVISIBLE);
+							}
+						} else if(fwd_acc >= fwd_thres) {
+							if(EventState.checkTransit(State.ACC)) {
+								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
+								processStateList(State.ACC, "ACCELERATE");
+								EventState.setCurrent(State.ACC, System.currentTimeMillis());
+								tv_event.setText(EventState.getState().toString());
+								
+								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+								if(acc > 3) {
+									aggressive = " AGGRESSIVE";
+									iv_warn.setVisibility(View.VISIBLE);
+									
+									//log the event to the file
+									if(start_log == true && end_log == true) {
+										//save to SD
+										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+										
+										drive_log = "";
+									}
+								}
+								else 
+									iv_warn.setVisibility(View.INVISIBLE);
+							}
 						}
-					} else if(fwd_acc >= fwd_thres) {
-						if(EventState.checkTransit(State.ACC)) {
-							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
-							processStateList(State.ACC, "ACCELERATE");
-							EventState.setCurrent(State.ACC, System.currentTimeMillis());
-							tv_event.setText(EventState.getState().toString());
+					} else if(vert_flag == true) {
+						if(fwd_acc >= fwd_thres) {
+							if(EventState.checkTransit(State.DEC)) {
+								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
+								processStateList(State.DEC, "DECELERATE");
+								EventState.setCurrent(State.DEC, System.currentTimeMillis());
+								tv_event.setText(EventState.getState().toString());
+
+								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+								if(acc > 3) {
+									aggressive = " AGGRESSIVE";
+									iv_warn.setVisibility(View.VISIBLE);
+									
+									//log the event to the file
+									if(start_log == true && end_log == true) {
+										//save to SD
+										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+										
+										drive_log = "";
+									}
+								}
+								else 
+									iv_warn.setVisibility(View.INVISIBLE);
+							}
+						} else if(fwd_acc <= (back_thres*-1)) {
+							if(EventState.checkTransit(State.ACC)) {
+								processStateTime(System.currentTimeMillis() - EventState.getStartTs());
+								processStateList(State.ACC, "ACCELERATE");
+								EventState.setCurrent(State.ACC, System.currentTimeMillis());
+								tv_event.setText(EventState.getState().toString());
+								
+								double acc = fwd_acc - sensorMgr.GRAVITY_EARTH;
+								if(acc > 3) {
+									aggressive = " AGGRESSIVE";
+									iv_warn.setVisibility(View.VISIBLE);
+									
+									//log the event to the file
+									if(start_log == true && end_log == true) {
+										//save to SD
+										drive_log += time_stamp("time") + "\t" + EventState.getState().toString() + "\n";
+										save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+										
+										drive_log = "";
+									}
+								}
+								else 
+									iv_warn.setVisibility(View.INVISIBLE);
+							}
 						}
 					}
+					
 				}
 				
 //				//get forward acceleration values - Y AXIS
@@ -531,10 +650,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 //				gyro_angle.appendData(new GraphViewData(System.currentTimeMillis(), angle_z), true);
 				
 				//--------------------------------- GYRO STOP / CONSTANT STATE ----------------------------------------//
-				if((gData[1] > 0 && gData[1] <= cal_gyro[1]+gyro_thres) || (gData[1] >0 && gData[1] >= cal_gyro[1]-gyro_thres) ) {
-					g_stationary = true;
-				}
-				
 				if(timestamp != 0) {
 					dT = (event.timestamp - timestamp) * NS2S;							
 				} 
@@ -581,13 +696,6 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 		
 		tv_show_events.setText(event_string);
-//		if(q_state != null && !q_state.isEmpty() && q_time != null && !q_time.isEmpty()) {
-//			Toast.makeText(this, "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1), Toast.LENGTH_SHORT);
-//			Log.d("TIME", "state : "  + q_state.get(q_state.size()-1) + ", time : " + q_time.get(q_time.size()-1));
-//		}
-//		tv_event.setText(EventState.getState().toString());
-//		event_string += "State : " + EventState.getState().toString();
-//		tv_show_events.setText(event_string);
 		
 	}
 	
@@ -797,10 +905,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			//log the event to the file
 			if(start_log == true && end_log == true) {
 				//save to SD
-				data_save += time_stamp("time") + "\t" + msg + "\n";
-				save_ext.writeExt(curr_time , data_save, "Eventlog");
-				
-				data_save = "";
+				data_save += time_stamp("time") + "\t" + msg;
 			}
 		}
 		else if(!q_state.isEmpty() && q_state.get(q_state.size()-1) != state) {
@@ -810,10 +915,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			//log the event to the file
 			if(start_log == true && end_log == true) {
 				//save to SD
-				data_save += time_stamp("time") + "\t" + msg + "\n";
-				save_ext.writeExt(curr_time , data_save, "Eventlog");
-				
-				data_save = "";
+				data_save += time_stamp("time") + "\t" + msg;
 			}
 		}
 	}
@@ -828,20 +930,63 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
+				
+				//log the event to the file
+				if(start_log == true && end_log == true) {
+					//save to SD
+					drive_log += time_stamp("time") + "\t" + q_state.get(0) + "\t" + convert + "\n";
+					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+					
+					drive_log = "";
+				}
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
 			event_string += "\nTime : " + convert + aggressive + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += "\t" + convert + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
 		else if(!q_time.isEmpty() && q_time.size() == q_state.size()-1) {
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
 				iv_warn.setVisibility(View.VISIBLE);
+				
+				//log the event to the file
+				if(start_log == true && end_log == true) {
+					//save to SD
+					drive_log += time_stamp("time") + "\t" + q_state.get(q_state.size()-1) + "\t" + convert + "\n";
+					save_ext.writeExt(curr_time , drive_log, "DrivingLog");
+					
+					drive_log = "";
+				}
 			}
 			else 
 				iv_warn.setVisibility(View.INVISIBLE);
 			event_string += "\nTime : " + convert + aggressive + "\n";
+			
+			//log the event to the file
+			if(start_log == true && end_log == true) {
+				//save to SD
+				data_save += "\t" + convert + "\n";
+				save_ext.writeExt(curr_time , data_save, "Eventlog");
+				
+				data_save = "";
+			}
 		}
+	}
+	
+	private void save_log(String msg, String path) {
+		data_log += time_stamp("time") + "\t" + msg + "\n";
+		//save timestamp on start log
+		save_ext.writeExt(curr_time , data_log, path);
+		data_log = "";
 	}
 }
