@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private Button b_accel, b_decel;
 	private Button b_constant, b_stop;
 	private TextView tv_event, tv_show_events, tv_gps, tv_acc;
+	private ImageView iv_warn;
 	
 	//Dialog 
 	DialogAct_nonSpanned log_dialog;
@@ -174,6 +176,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		tv_gps = (TextView) findViewById(R.id.tv_gps);
 		
 		tv_acc = (TextView) findViewById(R.id.accelerometer_text);
+		iv_warn = (ImageView) findViewById(R.id.iv_warning);
 		
 		b_start_log = (Button) findViewById(R.id.b_start_log);
 		b_end_log = (Button) findViewById(R.id.b_end_log);
@@ -921,14 +924,31 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	private void processStateTime(long time) {
 		
 		double convert = time/1000.0;
+		String aggressive = "";
 		
 		if(q_time.isEmpty() && q_state.size() == 1) {
 			q_time.add(time);
-			event_string += "\nTime : " + convert + "\n";
+			if(convert< 0.5) {
+				aggressive = "AGGRESSIVE";
+				iv_warn.setVisibility(View.VISIBLE);
+			}
+			else 
+				iv_warn.setVisibility(View.INVISIBLE);
+			event_string += "\nTime : " + convert + aggressive + "\n";
 		}
 		else if(!q_time.isEmpty() && q_time.size() == q_state.size()-1) {
 			q_time.add(time);
-			event_string += "\nTime : " + convert + "\n";
+			if(convert< 0.5) {
+				aggressive = "AGGRESSIVE";
+				iv_warn.setVisibility(View.VISIBLE);
+			}
+			else 
+				iv_warn.setVisibility(View.INVISIBLE);
+			event_string += "\nTime : " + convert + aggressive + "\n";
 		}
+	}
+	
+	private void checktime() {
+		
 	}
 }
