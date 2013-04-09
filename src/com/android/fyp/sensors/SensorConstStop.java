@@ -35,6 +35,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
@@ -49,6 +50,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//STATE LIST
 	private List<State> q_state = new ArrayList<State>();
 	private List<Long> q_time = new ArrayList<Long>();
+	private List<State> q_risk = new ArrayList<State>();
 	
 	//UI Buttons
 	private Button b_start_log, b_end_log;
@@ -87,6 +89,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//relative acceleration
 	double rel_acc = 0;
 	private boolean acc_check = false, dec_check = false;
+	double max_acc = -10000000;
+	double min_acc = 10000000;
+	int count = 0;
+	private double[] window = new double[10];
 	
 	//Gyroscope
 	//to store the integrated angle
@@ -102,6 +108,10 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	double min = 10000000;
 	//minimal vertical distance between two peaks
 	double dist_peaks = 0.05;
+	double max_gyro = -10000000;
+	double min_gyro = 10000000;
+	private double[] window_gyro = new double[10];
+	int count2 = 0;
 	
 	//THRESHOLDS
 	//5000 = 5secs
@@ -114,7 +124,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 	//accelerationfast
 	private final double acc_aggr = 10;
 	//accelerationturnfast
-	private final double acc_turn_aggr = 7;
+	private final double acc_turn_aggr = 5;
 	
 	//Location Manager
 	private LocationManager locationMgr; 
@@ -395,6 +405,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		
 		long diff_const;
 		String aggressive = "";
+		long acc_window;
 		
 		switch(event.sensor.getType()) {
 		
@@ -402,6 +413,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				
 				aData = event.values.clone();
 				
+				acc_window = System.currentTimeMillis();
 				double fwd_acc = 0;
 				float gravity = 0;
 				
@@ -501,7 +513,38 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							}
 						}
 					}
+
+					if(count < 10)
+						window[count] = fwd_acc;
 					
+					count++; 
+					
+//					Toast.makeText(this, "count: " + count, Toast.LENGTH_SHORT).show();
+					
+					if(count == 10) {
+						for(int i=0; i<10; i++) {
+							if(window[i] > max_acc)
+								max_acc = window[i];
+							else if(window[i] < min_acc)
+								min_acc = window[i];
+								
+//							Log.d("rapid", "test : " + (max_acc - min_acc));
+//							Toast.makeText(this, "test : " + (max_acc - min_acc), Toast.LENGTH_SHORT).show();
+							
+							if((max_acc - min_acc) != 20000000 && (max_acc - min_acc) >= 3.0) {
+//								Log.d("rapid", "test : " + (max_acc - min_acc));
+//								Toast.makeText(this, "entered : " + (max_acc - min_acc), Toast.LENGTH_SHORT).show();
+//								aggr_save_log("RAPID ACCELERATION/DECELERATION");
+								
+								processRiskyStateList(State.RAPID_ACC, "RAPID ACCELERATION/DECELERATION");
+								
+//								new show_warning().execute();
+							}
+						}
+						count = 0;
+					}
+					max_acc = -10000000;
+					min_acc = 10000000;
 				}
 				
 				break;
@@ -531,34 +574,35 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 					integrateGyro(event.timestamp, timestamp, "z", gData[2], dT);
 					if((angle_z - prev_z) > 1.0) {
 						if(EventState.checkDir(State.LEFT)) {
+							if(EventState.getState() == State.ACC && rel_acc >= acc_turn_aggr) {
+								//aggr_save_log("RISKY LEFT TURN");
+								
+								processRiskyStateList(State.R_LEFT, "RISKY LEFT TURN");
+								
+//								new show_warning().execute();
+							}
+							
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.LEFT, "LEFT");
 							EventState.setDir(State.LEFT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							
-							if(acc_check == true && rel_acc >= acc_turn_aggr) {
-								iv_warn.setVisibility(View.VISIBLE);
-								aggr_save_log("RISKY LEFT TURN");
-							}
-							else 
-								iv_warn.setVisibility(View.INVISIBLE);
-							
 						}
 					}
 					else if((angle_z - prev_z) < -1.0) {
 						if(EventState.checkDir(State.RIGHT)) {
+							
+							if(EventState.getState() == State.ACC && rel_acc >= acc_turn_aggr) {
+								//aggr_save_log("RISKY RIGHT TURN");
+								
+								processRiskyStateList(State.R_RIGHT, "RISKY RIGHT TURN");
+								
+//								new show_warning().execute();
+							}
+							
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs());
 							processStateList(State.RIGHT, "RIGHT");
 							EventState.setDir(State.RIGHT, System.currentTimeMillis());
 							tv_event.setText(EventState.getDir().toString());
-							
-							if(acc_check == true && rel_acc >= acc_turn_aggr) {
-								iv_warn.setVisibility(View.VISIBLE);
-								
-								aggr_save_log("RISKY RIGHT TURN");
-							}
-							else 
-								iv_warn.setVisibility(View.INVISIBLE);
 						}
 					}
 					
@@ -567,6 +611,39 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 				} else {
 					EventState.setDir_str(State.STRAIGHT);
 				}
+				
+				if(count2 < 10)
+					window_gyro[count2] = gData[2];
+				
+				count2++; 
+				
+//				Toast.makeText(this, "count: " + count2, Toast.LENGTH_SHORT).show();
+				
+				if(count2 == 10) {
+					for(int i=0; i<10; i++) {
+						if(window_gyro[i] > max_gyro)
+							max_gyro = window_gyro[i];
+						else if(window_gyro[i] < min_gyro)
+							min_gyro = window_gyro[i];
+							
+//						Log.d("rapid", "test : " + (max_gyro - min_gyro));
+//						Toast.makeText(this, "test : " + (max_gyro - min_gyro) + " , max : " + max_gyro + " ,min : " + min_gyro, Toast.LENGTH_SHORT).show();
+						
+						if(max_gyro!= -10000000 && min_gyro != 10000000 && 
+								Math.abs(max_gyro - min_gyro) >= 3.0) {
+//							Log.d("rapid", "test : " + (max_gyro - min_gyro));
+//							Toast.makeText(this, "entered : " + (max_gyro - min_gyro), Toast.LENGTH_SHORT).show();
+							//aggr_save_log("SWERVING");
+							
+							processRiskyStateList(State.SWERVE, "SWERVING");
+							
+//							new show_warning().execute();
+						}
+					}
+					count2 = 0;
+				}
+				max_gyro = -10000000;
+				min_gyro = 10000000;
 				
 				break;
 				
@@ -802,6 +879,24 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		}
 	}
 	
+	//add state to risky list
+	private void processRiskyStateList(State state, String msg) {
+		//IF STATELIST IS EMPTY -------------------------------------------------------------------------------------------------//
+		if(q_risk.isEmpty()) {
+			q_risk.add(state);
+//			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			aggr_save_log(msg);
+			
+		} //IF STATELIST IS NOT EMPTY AND LAST ELEMENT IN LIST != CURRENT STATE (PREVENT DUPLICATES) ----------------------------//
+		else if(!q_risk.isEmpty() && q_risk.get(q_risk.size()-1) != state) {
+			q_risk.add(state);
+//			event_string += "\n" + msg + ", curr_state : " + state.toString() + "\n";
+			
+			aggr_save_log(msg);
+		}
+	}
+	
 	//ADD TIME FOR THE STATE
 	private void processStateTime(long time) {
 		
@@ -814,11 +909,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
-				iv_warn.setVisibility(View.VISIBLE);
 				aggr_save_log(q_state.get(0) + "\t" + convert);
+				
+//				new show_warning().execute();
 			}
-			else 
-				iv_warn.setVisibility(View.INVISIBLE);
+
 			event_string += "\nTime : " + convert + aggressive + "\n";
 			
 			//log the event to the file
@@ -834,11 +929,11 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			q_time.add(time);
 			if(convert< 0.5) {
 				aggressive = " AGGRESSIVE";
-				iv_warn.setVisibility(View.VISIBLE);
 				aggr_save_log(q_state.get(q_state.size()-1) + "\t" + convert);
+				
+//				new show_warning().execute();
 			}
-			else 
-				iv_warn.setVisibility(View.INVISIBLE);
+			
 			event_string += "\nTime : " + convert + aggressive + "\n";
 			
 			//log the event to the file
@@ -857,7 +952,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		if(rel_acc >= acc_aggr) {
 			aggr_save_log(EventState.getState().toString());
 			
-			new show_warning().execute();
+//			new show_warning().execute();
 		}
 	}
 	
@@ -871,6 +966,8 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 			
 			drive_log = "";
 		}
+		
+		new show_warning().execute();
 	}
 	
 	//tag save log
@@ -887,15 +984,21 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 		alert_log.show();
 	}
 	
+	//show warning logo
 	private class show_warning extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			
-			iv_warn.setVisibility(View.VISIBLE);
+			runOnUiThread(new Runnable() {
+		        
+		        public void run() {
+		        	iv_warn.setVisibility(View.VISIBLE);
+		        }
+		      });
 			
 			try {
-				Thread.sleep(150);
+				Thread.sleep(2000);
 			} catch(Exception e){};
 			
 			return null;

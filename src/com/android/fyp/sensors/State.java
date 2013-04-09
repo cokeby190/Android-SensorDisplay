@@ -10,5 +10,9 @@ public enum State {
 	STOP, 
 	LEFT, 
 	RIGHT,
-	STRAIGHT;
+	STRAIGHT,
+	R_LEFT,
+	R_RIGHT,
+	SWERVE,
+	RAPID_ACC;
 }
