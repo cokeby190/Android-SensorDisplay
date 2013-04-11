@@ -37,7 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SensorConstStop extends Activity implements OnClickListener, SensorEventListener, LocationListener{
+public class SensorConstStop_para extends Activity implements OnClickListener, SensorEventListener, LocationListener{
 	
 	private GraphView graphView;
 	private GraphViewSeries gyro_x, gyro_y, gyro_z, gyro_angle;
@@ -243,12 +243,12 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 //    		cal_gyro = getdata.getFloatArray("Gyro");
 //    	}
 		
-		Intent intent = getIntent();
-		String orientation = intent.getStringExtra("orientation");
-		if(orientation.equals("flat"))
-			flat_flag = true;
-		else if(orientation.equals("vert"))
-			vert_flag = true;
+//		Intent intent = getIntent();
+//		String orientation = intent.getStringExtra("orientation");
+//		if(orientation.equals("flat"))
+//			flat_flag = true;
+//		else if(orientation.equals("vert"))
+//			vert_flag = true;
 		
 	}
 
@@ -501,7 +501,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							tv_event.setText(EventState.getState().toString());
 						}
 					} //ELSE IF GPS SPEED > 2 >> CONSTANT - (2mps = 7.2kmph) ---------------------------------------------------------//
-					else if(gps_speed >= 2.0 && diff_const > 5000) {
+					else if(gps_speed >= 2.0 && diff_const > 7000) {
 						if(EventState.checkTransit(State.CONST)) {
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs(), State.CONST);
 							processStateList(State.CONST, "CONSTANT SPEED");
@@ -572,7 +572,7 @@ public class SensorConstStop extends Activity implements OnClickListener, Sensor
 							tv_event.setText(EventState.getState().toString());
 						}
 					} //ELSE IF GPS SPEED > 2 >> CONSTANT - (2mps = 7.2kmph) ---------------------------------------------------------//
-					else if(gps_speed >= 2.0 && diff_const > 5000) {
+					else if(gps_speed >= 2.0 && diff_const > 7000) {
 						if(EventState.checkTransit(State.CONST)) {
 							processStateTime(System.currentTimeMillis() - EventState.getStartTs(), State.CONST);
 							processStateList(State.CONST, "CONSTANT SPEED");

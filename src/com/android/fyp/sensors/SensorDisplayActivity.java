@@ -211,7 +211,7 @@ public class SensorDisplayActivity extends Activity implements OnClickListener {
 				
 			case R.id.b_caliberate5:
 				
-				Intent cal_data5 = new Intent(this, SensorConstStop.class);
+				Intent cal_data5 = new Intent(this, SensorConstStop_para.class);
 				Bundle send_data5 = new Bundle();
 				if(acc == true)
 					//cal_data.putExtra("Acc", aData);
