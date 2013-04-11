@@ -49,6 +49,10 @@
             android:name=".SensorConstStopVert"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name=".SensorConstStop_para"
+            android:label="@string/app_name" >
+        </activity>
     </application>
 
 </manifest>
